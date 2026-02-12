@@ -34,6 +34,14 @@
         <h2><i class="fas fa-folder-tree"></i> Project Structure</h2>
         <pre class="docs-code">eco-basket/
 |- app.py
+|- eco_basket/
+|  |- application.py
+|  |- routes.py
+|  |- models.py
+|  |- catalog.py
+|  |- auth.py
+|  |- config.py
+|  |- database.py
 |- forms.py
 |- plants.py
 |- db.py
@@ -48,11 +56,12 @@
 |  |- payments.html
 |  |- process_payment.html
 |  |- ordersuccess.html
+|  |- admin_*.html
 |  |- project_documentation.html
 |- static/
 |  |- images/
 |- instance/
-   |- stor.db (default sqlite db)</pre>
+   |- flora.db (default sqlite db)</pre>
     </section>
 
     <section class="card docs-section">
@@ -76,6 +85,11 @@
                         <td><code>Order</code></td>
                         <td>Checkout, payment, and order lifecycle</td>
                         <td><code>user_id</code>, <code>plant_id</code>, <code>quantity</code>, <code>grand_total</code>, <code>payment_status</code>, <code>order_status</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>SupportTicket</code></td>
+                        <td>Customer complaints and agent workflow</td>
+                        <td><code>reference_code</code>, <code>category</code>, <code>priority</code>, <code>status</code>, <code>assigned_agent</code></td>
                     </tr>
                 </tbody>
             </table>
@@ -155,6 +169,11 @@ copy .env.example .env
 
 # 3) Run app
 python app.py</pre>
+    </section>
+
+    <section class="card docs-section">
+        <h2><i class="fas fa-link"></i> Related Documentation</h2>
+        <p><a href="{{ url_for('developer_documentation') }}">Developer Documentation</a> | <a href="{{ url_for('database_documentation') }}">Database Documentation</a></p>
     </section>
 </div>
 

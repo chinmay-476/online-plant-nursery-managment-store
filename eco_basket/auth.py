@@ -7,7 +7,17 @@ from flask import flash, redirect, session, url_for
 
 
 def clear_user_session() -> None:
-    for key in ["user_id", "user_name", "user_email", "checkout", "last_order_id", "cart_coupon", "cart_loyalty_discount"]:
+    for key in [
+        "user_id",
+        "user_name",
+        "user_email",
+        "checkout",
+        "current_order_id",
+        "payment_processing",
+        "last_order_id",
+        "cart_coupon",
+        "cart_loyalty_discount",
+    ]:
         session.pop(key, None)
 
 

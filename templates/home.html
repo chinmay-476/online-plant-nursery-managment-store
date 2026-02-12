@@ -761,10 +761,15 @@ body.dark-theme .plant-price {
             <h1>Welcome to Flaura Botanicals</h1>
             <p>Transform your space with beautiful, healthy plants. From indoor greenery to outdoor gardens, we nurture nature's finest for your home!</p>
             <div class="hero-buttons">
-                
-                <a href="{{ url_for('login') }}" class="btn btn-secondary">
+                {% if is_admin_user %}
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-user-shield"></i> Open Admin Dashboard
+                </a>
+                {% else %}
+                <a href="{{ url_for('showproduct') }}" class="btn btn-secondary">
                     <i class="fas fa-seedling"></i> Browse Collection
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -810,6 +815,7 @@ body.dark-theme .plant-price {
 
 
 
+{% if not is_admin_user %}
 <section class="plant-preview">
     <div class="container">
         <h2 class="page-title">Featured Plants</h2>
@@ -850,6 +856,7 @@ body.dark-theme .plant-price {
         </div>
     </div>
 </section>
+{% endif %}
 
 <section class="seasonal-section">
     <div class="container">
@@ -905,6 +912,7 @@ body.dark-theme .plant-price {
     </div>
 </section>
 
+{% if not is_admin_user %}
 <section class="cta-section">
     <div class="container">
         <h2>Ready to Green Your Space?</h2>
@@ -912,6 +920,7 @@ body.dark-theme .plant-price {
         
     </div>
 </section>
+{% endif %}
 
 <script>
     // Add interactive animations

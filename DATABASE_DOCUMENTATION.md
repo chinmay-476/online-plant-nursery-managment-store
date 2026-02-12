@@ -17,7 +17,7 @@ The same values are present in:
 - `db.py` defaults
 
 ## Admin Bootstrap Configuration
-Admin bootstrap runs on startup (`ensure_default_admin_user` in `app.py`) and ensures an admin account exists.
+Admin bootstrap runs on startup (`_ensure_default_admin_user` in `eco_basket/application.py`) and ensures an admin account exists.
 
 - Admin email: `chinmay@gmail.com`
 - Admin password: `chin1987`
@@ -45,9 +45,9 @@ python app.py
 
 On startup the app runs:
 - `db.create_all()` for tables
-- `ensure_default_admin_user()` to create/update the configured admin login
+- `_ensure_default_admin_user()` to create/update the configured admin login
 
-## Core Tables
+## SQLAlchemy Tables (Current)
 
 ### `store`
 - `id` (PK)
@@ -57,7 +57,30 @@ On startup the app runs:
 - `password` (hashed)
 - `created_at`
 
-### `orders`
+### `catalog_override`
+- `plant_id` (PK)
+- `price_override`
+- `stock_override`
+- `offer_override`
+- `new_override`
+- `is_active`
+- `updated_at`
+
+### `cart_item`
+- `id` (PK)
+- `user_id` (FK -> `store.id`)
+- `plant_id`
+- `quantity`, `unit_price`
+- `created_at`, `updated_at`
+
+### `wishlist_item`
+- `id` (PK)
+- `user_id` (FK -> `store.id`)
+- `plant_id`
+- `created_at`
+- Unique: `(user_id, plant_id)`
+
+### `order`
 - `id` (PK)
 - `user_id` (FK -> `store.id`)
 - `customer_name`, `email`, `phone_number`
@@ -69,33 +92,16 @@ On startup the app runs:
 - `order_status`
 - `order_date`
 
-### `cart_items`
+### `user_profile`
 - `id` (PK)
 - `user_id` (FK -> `store.id`)
-- `plant_id`
-- `quantity`, `unit_price`
+- `role`
+- `loyalty_points`
+- `referral_code` (unique, nullable)
+- `referred_by`
 - `created_at`, `updated_at`
-- Unique: `(user_id, plant_id)`
 
-### `wishlist_items`
-- `id` (PK)
-- `user_id` (FK -> `store.id`)
-- `plant_id`
-- `created_at`
-- Unique: `(user_id, plant_id)`
-
-### `catalog_overrides`
-Admin product overrides.
-
-- `plant_id` (PK)
-- `price_override`
-- `stock_override`
-- `offer_override`
-- `new_override`
-- `is_active`
-- `updated_at`
-
-### `support_tickets`
+### `support_ticket`
 - `id` (PK)
 - `user_id` (FK -> `store.id`)
 - `reference_code` (unique)
@@ -103,12 +109,46 @@ Admin product overrides.
 - `status`, `assigned_agent`
 - `created_at`, `updated_at`
 
-### `support_messages`
+### `support_message`
 - `id` (PK)
-- `ticket_id` (FK -> `support_tickets.id`)
+- `ticket_id` (FK -> `support_ticket.id`)
 - `sender_role`, `sender_name`
 - `message`
 - `created_at`
+
+### `product_review`
+- `id` (PK)
+- `user_id` (FK -> `store.id`)
+- `plant_id`
+- `rating`, `title`, `comment`
+- `created_at`, `updated_at`
+- Unique: `(user_id, plant_id)`
+
+### `review_moderation`
+- `id` (PK)
+- `review_id` (FK -> `product_review.id`, unique)
+- `status`
+- `moderated_by`, `moderated_at`
+- `created_at`
+
+### `return_request`
+- `id` (PK)
+- `order_id` (FK -> `order.id`, unique)
+- `user_id` (FK -> `store.id`)
+- `reason`, `details`
+- `status`
+- `admin_note`
+- `created_at`
+- `updated_at`
+
+### `stock_alert_subscription`
+- `id` (PK)
+- `user_id` (FK -> `store.id`)
+- `plant_id`
+- `variant_code`
+- `status`
+- `created_at`
+- Unique: `(user_id, plant_id, variant_code)`
 
 ## Notes
 - Passwords are stored hashed using Werkzeug.

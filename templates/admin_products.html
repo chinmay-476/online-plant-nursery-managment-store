@@ -55,8 +55,14 @@
                     {% for item in items %}
                     <tr class="{{ '' if item.active else 'row-inactive' }}">
                         <td>
-                            <strong>{{ item.name }}</strong>
-                            <div class="small-text">{{ item.id }}</div>
+                            <div class="product-cell">
+                                <img class="product-thumb" src="{{ url_for('static', filename='images/' + item.image) }}" alt="{{ item.name }}"
+                                    onerror="this.src='{{ url_for('static', filename='images/snake-plant.jpg') }}'">
+                                <div>
+                                    <strong>{{ item.name }}</strong>
+                                    <div class="small-text">{{ item.id }}</div>
+                                </div>
+                            </div>
                         </td>
                         <td>
                             <i class="{{ category_icons.get(item.category, 'fas fa-seedling') }}"></i>
@@ -171,6 +177,22 @@
     .small-text {
         color: var(--text-muted);
         font-size: 0.8rem;
+    }
+
+    .product-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 220px;
+    }
+
+    .product-thumb {
+        width: 52px;
+        height: 52px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: var(--surface-color);
     }
 
     .inline-form {

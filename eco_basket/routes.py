@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import secrets
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 from flask import Blueprint, current_app, flash, jsonify, redirect, render_template, request, session, url_for
@@ -212,6 +213,40 @@ def _next_ticket_reference() -> str:
     return f"TKT-{datetime.utcnow():%y%m%d}-{token}"
 
 
+def _route_inventory(app: Any) -> list[dict[str, str]]:
+    route_details: list[dict[str, str]] = []
+    for rule in app.url_map.iter_rules():
+        if rule.endpoint == "static":
+            continue
+        methods = sorted([method for method in rule.methods if method not in {"HEAD", "OPTIONS"}])
+        route_details.append(
+            {
+                "path": str(rule.rule),
+                "methods": ", ".join(methods),
+                "endpoint": str(rule.endpoint),
+            }
+        )
+    route_details.sort(key=lambda row: (row["path"], row["endpoint"]))
+    return route_details
+
+
+def _masked_database_url(raw_url: str) -> str:
+    raw = str(raw_url or "").strip()
+    if not raw:
+        return ""
+    try:
+        from sqlalchemy.engine.url import make_url
+    except Exception:
+        return raw
+    try:
+        parsed = make_url(raw)
+        if parsed.password:
+            parsed = parsed.set(password="***")
+        return str(parsed)
+    except Exception:
+        return raw
+
+
 def _with_loyalty(summary: dict, user_id: int) -> tuple[int, int, int]:
     profile = _get_or_create_profile(user_id)
     available_points = max(_safe_int(profile.loyalty_points), 0)
@@ -273,6 +308,7 @@ def register_routes(app: Any) -> None:
             profile = UserProfile.query.filter_by(user_id=user_id).first()
             if profile:
                 points = max(_safe_int(profile.loyalty_points), 0)
+        is_admin_user = bool(session.get("admin_id")) and _is_admin_email(str(session.get("admin_email") or ""), app)
         return {
             "role_labels": ROLE_LABELS,
             "sunlight_labels": SUNLIGHT_LABELS,
@@ -285,6 +321,7 @@ def register_routes(app: Any) -> None:
             "loyalty_discount": max(_safe_int(session.get("cart_loyalty_discount"), 0), 0),
             "recommended_items": [],
             "return_by_order": {},
+            "is_admin_user": is_admin_user,
         }
 
     @app.route("/")
@@ -321,11 +358,39 @@ def register_routes(app: Any) -> None:
 
     @app.route("/project-documentation")
     def project_documentation() -> Any:
-        return render_template("project_documentation.html", title="Project Documentation")
+        env_config = {
+            "database_url": _masked_database_url(str(app.config.get("SQLALCHEMY_DATABASE_URI", "") or "")),
+            "session_cookie_secure": bool(app.config.get("SESSION_COOKIE_SECURE", False)),
+            "session_cookie_samesite": str(app.config.get("SESSION_COOKIE_SAMESITE", "Lax")),
+        }
+        return render_template(
+            "project_documentation.html",
+            title="Project Documentation",
+            env_config=env_config,
+            route_details=_route_inventory(app),
+        )
 
     @app.route("/developer-documentation")
     def developer_documentation() -> Any:
-        return render_template("developer_documentation.html", title="Developer Documentation")
+        return render_template(
+            "developer_documentation.html",
+            title="Developer Documentation",
+            database_uri=_masked_database_url(str(app.config.get("SQLALCHEMY_DATABASE_URI", "") or "")),
+            route_details=_route_inventory(app),
+        )
+
+    @app.route("/database-documentation")
+    def database_documentation() -> Any:
+        doc_path = Path(app.root_path).resolve().parents[0] / "DATABASE_DOCUMENTATION.md"
+        try:
+            content = doc_path.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            content = "DATABASE_DOCUMENTATION.md not found."
+        return render_template(
+            "database_documentation.html",
+            title="Database Documentation",
+            markdown_content=content,
+        )
 
     @app.route("/offersection")
     def offersection() -> Any:
@@ -843,8 +908,8 @@ def register_routes(app: Any) -> None:
 
         if applied_coupon_code and session.get("cart_coupon") == applied_coupon_code:
             session.pop("cart_coupon", None)
-        session["current_order_id"] = order.id
         db.session.flush()
+        session["current_order_id"] = order.id
         db.session.commit()
         return redirect(url_for("payments", order_id=order.id))
 
@@ -922,6 +987,7 @@ def register_routes(app: Any) -> None:
         db.session.commit()
         session["last_order_id"] = order.id
         session.pop("checkout", None)
+        session.pop("current_order_id", None)
         session.pop("cart_loyalty_discount", None)
         flash(f"Payment successful via {str(order.payment_method or 'cod').upper()}! Order confirmed.", "success")
         return redirect(url_for("ordersuccess", order_id=order.id))
@@ -1523,7 +1589,7 @@ def register_routes(app: Any) -> None:
             "admin_support.html",
             title="Admin Support",
             tickets=tickets,
-            message_form=SupportTicketMessageForm(prefix="agent"),
+            message_form=SupportTicketMessageForm(),
             category_labels=SUPPORT_CATEGORY_LABELS,
             priority_labels=SUPPORT_PRIORITY_LABELS,
             status_labels=SUPPORT_STATUS_LABELS,

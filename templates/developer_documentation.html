@@ -11,9 +11,10 @@
         <h2><i class="fas fa-code-branch"></i> Architecture</h2>
         <ul>
             <li><strong>Backend:</strong> Flask app with server-rendered Jinja templates.</li>
-            <li><strong>ORM:</strong> Flask-SQLAlchemy models in <code>app.py</code>.</li>
-            <li><strong>Session Auth:</strong> User login state kept in Flask session.</li>
-            <li><strong>Catalog Source:</strong> Static plant metadata dictionary in <code>plants.py</code>.</li>
+            <li><strong>ORM:</strong> Flask-SQLAlchemy models in <code>eco_basket/models.py</code>.</li>
+            <li><strong>Routing:</strong> App routes are registered from <code>eco_basket/routes.py</code>.</li>
+            <li><strong>Session Auth:</strong> User/admin session guards are in <code>eco_basket/auth.py</code>.</li>
+            <li><strong>Catalog Source:</strong> Product catalog lives in <code>plants.py</code> and is enriched in <code>eco_basket/catalog.py</code>.</li>
         </ul>
     </section>
 
@@ -21,9 +22,9 @@
         <h2><i class="fas fa-box-open"></i> Key Features</h2>
         <ul>
             <li>Secure auth with password hashing.</li>
-            <li>Wishlist (browser localStorage) + server-side cart.</li>
+            <li>Wishlist sync (localStorage + server persistence), cart, coupon and loyalty flow.</li>
             <li>Delivery -> payment -> order success checkout pipeline.</li>
-            <li>Order history for authenticated users.</li>
+            <li>Order history, returns workflow, support tickets, chatbot, and full admin portal.</li>
         </ul>
     </section>
 
@@ -54,6 +55,11 @@
                         <td>Placed orders and payment state</td>
                         <td><code>user_id</code>, <code>plant_id</code>, <code>quantity</code>, <code>grand_total</code>, <code>payment_status</code>, <code>order_status</code></td>
                     </tr>
+                    <tr>
+                        <td><code>SupportTicket</code></td>
+                        <td>Complaint and support workflow</td>
+                        <td><code>reference_code</code>, <code>category</code>, <code>priority</code>, <code>status</code>, <code>assigned_agent</code></td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -64,7 +70,7 @@
         <p><strong>Active DB URI:</strong> <code>{{ database_uri }}</code></p>
         <pre class="code-block"># .env example
 SECRET_KEY=change-me
-DATABASE_URL=sqlite:///instance/stor.db
+DATABASE_URL=sqlite:///instance/flora.db
 FLASK_DEBUG=false
 SESSION_COOKIE_SECURE=false</pre>
     </section>
@@ -103,7 +109,7 @@ python app.py</pre>
         <h2><i class="fas fa-link"></i> Related Docs</h2>
         <p>
             <a href="{{ url_for('project_documentation') }}">Project Documentation</a> |
-            <a href="/DATABASE_DOCUMENTATION.md">Database Documentation (file)</a>
+            <a href="{{ url_for('database_documentation') }}">Database Documentation</a>
         </p>
     </section>
 </div>

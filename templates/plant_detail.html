@@ -177,9 +177,7 @@
             </div>
 
 
-
-
-
+            {% if not is_admin_user %}
             <div class="total-price">
                 <span class="total-label">Total Price:</span>
                 <span class="total-amount" id="totalPrice">{{ plant.price }}</span>
@@ -229,6 +227,12 @@
                 </form>
                 {% endif %}
             </div>
+            {% else %}
+            <div class="card" style="margin-top:12px; padding:14px;">
+                <strong><i class="fas fa-user-shield"></i> Admin View</strong>
+                <p style="margin:6px 0 0; color: var(--text-muted);">Ordering/cart/wishlist actions are hidden for admin accounts.</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -1201,6 +1205,18 @@
         interactiveElements.forEach(element => {
             element.style.transition = 'all 0.3s ease';
         });
+
+        if (typeof getWishlistIds === "function") {
+            const plantId = '{{ plant_key }}';
+            setWishlistButtonState(getWishlistIds().includes(plantId));
+            if (typeof syncWishlistWithServer === "function") {
+                syncWishlistWithServer().then((ids) => {
+                    if (Array.isArray(ids)) {
+                        setWishlistButtonState(ids.includes(plantId));
+                    }
+                });
+            }
+        }
     });
 
     // Image gallery functionality
@@ -1365,41 +1381,45 @@
     }
 
     // Wishlist functionality
-    async function addCurrentPlantToWishlist() {
+    function setWishlistButtonState(inWishlist) {
         const wishlistBtn = document.querySelector('.wishlist-btn');
-        const originalText = wishlistBtn.innerHTML;
-        const plantId = '{{ plant_key }}';
-        let added = false;
-        let existsInWishlist = false;
+        if (!wishlistBtn) return;
+        if (inWishlist) {
+            wishlistBtn.innerHTML = '<i class="fas fa-heart"></i> Remove from Wishlist';
+            wishlistBtn.style.background = 'var(--danger-color)';
+            wishlistBtn.style.color = '#fff';
+            return;
+        }
+        wishlistBtn.innerHTML = '<i class="fas fa-heart"></i> Add to Wishlist';
+        wishlistBtn.style.background = '';
+        wishlistBtn.style.color = '';
+    }
 
-        if (typeof window.addToWishlist === 'function') {
-            const result = await window.addToWishlist(plantId, { silent: true });
-            const items = Array.isArray(result?.items) ? result.items : [];
-            added = Boolean(result?.added);
-            existsInWishlist = items.includes(plantId);
+    async function addCurrentPlantToWishlist() {
+        const plantId = '{{ plant_key }}';
+        const currentIds = (typeof getWishlistIds === "function") ? getWishlistIds() : [];
+        const isInWishlist = currentIds.includes(plantId);
+
+        if (isInWishlist && typeof window.removeWishlistItem === 'function') {
+            await window.removeWishlistItem(plantId, { silent: true });
+            setWishlistButtonState(false);
+            showNotification('Removed from wishlist.', 'info');
+            return;
         }
 
-        if (!existsInWishlist) {
+        if (typeof window.addToWishlist !== 'function') {
             showNotification('Unable to add item to wishlist right now.', 'warning');
             return;
         }
 
-        if (!added) {
-            showNotification('Already in wishlist!', 'info');
+        const result = await window.addToWishlist(plantId, { silent: true });
+        const items = Array.isArray(result?.items) ? result.items : [];
+        if (!items.includes(plantId)) {
+            showNotification('Unable to add item to wishlist right now.', 'warning');
             return;
         }
-
-        wishlistBtn.innerHTML = '<i class="fas fa-heart"></i> Added to Wishlist!';
-        wishlistBtn.style.background = 'var(--success-color)';
-        wishlistBtn.style.color = 'white';
-
+        setWishlistButtonState(true);
         showNotification('Added to wishlist successfully!', 'success');
-
-        setTimeout(() => {
-            wishlistBtn.innerHTML = originalText;
-            wishlistBtn.style.background = '';
-            wishlistBtn.style.color = '';
-        }, 2000);
     }
 
     // Notification system

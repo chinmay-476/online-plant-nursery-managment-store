@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="db-docs-page">
+    <h1 class="page-title">Database Documentation</h1>
+    <p class="db-docs-lead">
+        Live view of <code>DATABASE_DOCUMENTATION.md</code> for developers and admins.
+    </p>
+
+    <section class="card db-docs-card">
+        <pre class="db-docs-content">{{ markdown_content }}</pre>
+    </section>
+</div>
+
+<style>
+    .db-docs-page {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .db-docs-lead {
+        text-align: center;
+        color: var(--text-muted);
+        margin: -1rem auto 1.5rem;
+    }
+
+    .db-docs-card {
+        padding: 18px;
+    }
+
+    .db-docs-content {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 0.95rem;
+        line-height: 1.55;
+        background: #102117;
+        color: #ddffe9;
+        border-radius: 10px;
+        padding: 14px;
+        overflow: auto;
+    }
+</style>
+{% endblock %}

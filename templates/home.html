@@ -1,0 +1,1084 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Video Background Styles */
+    .video-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -2;
+        overflow: hidden;
+    }
+
+    .video-background video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.25;
+        filter: blur(0.5px);
+        transition: opacity 0.3s ease, filter 0.3s ease;
+    }
+
+    .video-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            135deg,
+            rgba(45, 90, 39, 0.15) 0%,
+            rgba(127, 188, 140, 0.1) 50%,
+            rgba(168, 213, 186, 0.15) 100%
+        );
+        z-index: -1;
+        pointer-events: none;
+        transition: background 0.3s ease;
+    }
+
+    /* Theme-specific video adjustments */
+    [data-theme="light"] .video-background video {
+        opacity: 0.4;
+        filter: blur(0.5px) contrast(1.2) brightness(0.8);
+    }
+
+    [data-theme="light"] .video-overlay {
+        background: linear-gradient(
+            135deg,
+            rgba(45, 90, 39, 0.25) 0%,
+            rgba(127, 188, 140, 0.2) 50%,
+            rgba(168, 213, 186, 0.25) 100%
+        );
+    }
+
+    [data-theme="dark"] .video-background video {
+        opacity: 0.2;
+        filter: blur(0.5px) contrast(0.9) brightness(1.1);
+    }
+
+    [data-theme="dark"] .video-overlay {
+        background: linear-gradient(
+            135deg,
+            rgba(45, 90, 39, 0.3) 0%,
+            rgba(127, 188, 140, 0.25) 50%,
+            rgba(168, 213, 186, 0.3) 100%
+        );
+    }
+
+    /* Fallback for when theme attribute is not set */
+    body.light-theme .video-background video,
+    body:not(.dark-theme):not([data-theme]) .video-background video {
+        opacity: 0.4;
+        filter: blur(0.5px) contrast(1.2) brightness(0.8);
+    }
+
+    body.light-theme .video-overlay,
+    body:not(.dark-theme):not([data-theme]) .video-overlay {
+        background: linear-gradient(
+            135deg,
+            rgba(45, 90, 39, 0.25) 0%,
+            rgba(127, 188, 140, 0.2) 50%,
+            rgba(168, 213, 186, 0.25) 100%
+        );
+    }
+
+    body.dark-theme .video-background video {
+        opacity: 0.2;
+        filter: blur(0.5px) contrast(0.9) brightness(1.1);
+    }
+
+    body.dark-theme .video-overlay {
+        background: linear-gradient(
+            135deg,
+            rgba(45, 90, 39, 0.3) 0%,
+            rgba(127, 188, 140, 0.25) 50%,
+            rgba(168, 213, 186, 0.3) 100%
+        );
+    }
+
+    /* Ensure content stays above video */
+    body {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        color: white;
+        padding: 5rem 0;
+        text-align: center;
+        margin: -3rem -20px 4rem -20px;
+        border-radius: 0 0 40px 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M20 20c0-8 8-15 15-15s15 7 15 15-8 15-15 15-15-7-15-15z" fill="white" opacity="0.08"/><path d="M60 70c0-5 5-10 10-10s10 5 10 10-5 10-10 10-10-5-10-10z" fill="white" opacity="0.05"/></svg>') repeat;
+        animation: floatPattern 20s linear infinite;
+    }
+
+    @keyframes floatPattern {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100px); }
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-content h1 {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        font-weight: 800;
+        text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+        font-family: 'Dancing Script', cursive;
+        line-height: 1.2;
+    }
+
+    .hero-content p {
+        font-size: 1.4rem;
+        margin-bottom: 2.5rem;
+        opacity: 0.95;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 25px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
+    .hero-buttons .btn {
+        padding: 18px 40px;
+        font-size: 1.2rem;
+        border-radius: 50px;
+        transition: all 0.4s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+    .hero-buttons .btn:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+
+    .features-section {
+        margin: 5rem 0;
+        position: relative;
+    }
+
+    .features-section::before {
+        content: '🌿';
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 3rem;
+        opacity: 0.3;
+        animation: leafSway 3s ease-in-out infinite;
+    }
+
+    @keyframes leafSway {
+        0%, 100% { transform: translateX(-50%) rotate(-10deg); }
+        50% { transform: translateX(-50%) rotate(10deg); }
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2.5rem;
+        margin-top: 4rem;
+    }
+
+    .feature-card {
+        background: var(--surface-color);
+        padding: 2.5rem;
+        border-radius: 25px;
+        text-align: center;
+        box-shadow: var(--card-shadow);
+        border: 2px solid var(--border-color);
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--light-green));
+    }
+
+    .feature-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 20px 50px rgba(45, 90, 39, 0.2);
+        border-color: var(--accent-color);
+    }
+
+    .feature-icon {
+        font-size: 3.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        display: block;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: scale(1.2) rotate(5deg);
+        color: var(--secondary-color);
+    }
+
+    .feature-card h3 {
+        font-size: 1.6rem;
+        margin-bottom: 1.2rem;
+        color: var(--text-color);
+        font-weight: 600;
+    }
+
+    .feature-card p {
+        color: var(--text-muted);
+        line-height: 1.7;
+        font-size: 1.05rem;
+    }
+
+    .stats-section {
+        background: linear-gradient(135deg, var(--surface-color), rgba(168, 213, 186, 0.1));
+        padding: 4rem 0;
+        margin: 5rem -20px;
+        border-radius: 30px;
+        border: 2px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stats-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 30%, rgba(45, 90, 39, 0.05) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 70%, rgba(127, 188, 140, 0.05) 0%, transparent 50%);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 3rem;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-item {
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: scale(1.1);
+    }
+
+    .stat-item h3 {
+        font-size: 3rem;
+        color: var(--primary-color);
+        font-weight: bold;
+        margin-bottom: 0.8rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .stat-item p {
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .plant-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin: 4rem 0;
+    }
+
+    .plant-card {
+        background: var(--surface-color);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+        border: 2px solid var(--border-color);
+        transition: all 0.4s ease;
+        position: relative;
+    }
+
+    .plant-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(45, 90, 39, 0.2);
+        border-color: var(--accent-color);
+    }
+
+    .plant-image {
+        height: 220px;
+        background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .plant-image::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+
+    .plant-content {
+        padding: 2rem;
+    }
+
+    .plant-content h4 {
+        font-size: 1.4rem;
+        margin-bottom: 0.8rem;
+        color: var(--text-color);
+        font-weight: 600;
+    }
+
+    .plant-content p {
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .plant-price {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .plant-care-badge {
+        background: var(--light-green);
+        color: var(--primary-color);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .testimonials {
+        margin: 5rem 0;
+        text-align: center;
+        position: relative;
+    }
+
+    .testimonials::before {
+        content: '🌱';
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 2.5rem;
+        opacity: 0.3;
+        animation: grow 3s ease-in-out infinite;
+    }
+
+    @keyframes grow {
+        0%, 100% { transform: translateX(-50%) scale(1); }
+        50% { transform: translateX(-50%) scale(1.2); }
+    }
+
+    .testimonial-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2.5rem;
+        margin-top: 3rem;
+    }
+
+    .testimonial-card {
+        background: var(--surface-color);
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        border: 2px solid var(--border-color);
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-color);
+    }
+
+    .testimonial-card::before {
+        content: '🌿';
+        font-size: 3rem;
+        position: absolute;
+        top: -15px;
+        right: 20px;
+        opacity: 0.3;
+    }
+
+    .testimonial-text {
+        font-style: italic;
+        margin-bottom: 1.5rem;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    .testimonial-author {
+        font-weight: bold;
+        color: var(--primary-color);
+        font-size: 1.1rem;
+    }
+
+    .cta-section {
+        text-align: center;
+        margin: 5rem 0;
+        padding: 4rem 3rem;
+        background: linear-gradient(135deg, 
+            rgba(45, 90, 39, 0.1), 
+            rgba(127, 188, 140, 0.1), 
+            rgba(168, 213, 186, 0.1));
+        border-radius: 30px;
+        border: 2px solid rgba(45, 90, 39, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M30 30c0-10 10-20 20-20s20 10 20 20-10 20-20 20-20-10-20-20z" fill="rgba(45,90,39,0.03)"/></svg>') repeat;
+        animation: floatPattern 25s linear infinite reverse;
+    }
+
+    .cta-section h2 {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+        font-family: 'Dancing Script', cursive;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-section p {
+        font-size: 1.2rem;
+        margin-bottom: 2.5rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        position: relative;
+        z-index: 1;
+        line-height: 1.6;
+    }
+
+    .seasonal-section {
+        background: var(--surface-color);
+        padding: 4rem 0;
+        margin: 5rem -20px;
+        border-radius: 25px;
+        border: 2px solid var(--border-color);
+        text-align: center;
+    }
+
+    .seasonal-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    .seasonal-item {
+        padding: 2rem;
+        border-radius: 15px;
+        background: linear-gradient(135deg, rgba(45, 90, 39, 0.05), rgba(168, 213, 186, 0.05));
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .seasonal-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(45, 90, 39, 0.1);
+    }
+
+    .seasonal-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .seasonal-item h4 {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .seasonal-item p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    @media (max-width: 768px) {
+        .hero-content h1 {
+            font-size: 2.8rem;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+        }
+
+        .hero-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stats-section {
+            margin: 3rem -15px;
+        }
+
+        .features-grid,
+        .plant-preview,
+        .testimonial-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .cta-section {
+            padding: 3rem 1.5rem;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+        }
+    }
+    /* Theme-responsive text colors for page titles and green text elements */
+
+/* Base styles for page titles */
+.page-title {
+    transition: color 0.3s ease;
+}
+
+/* Light theme styles */
+[data-theme="light"] .page-title,
+body.light-theme .page-title,
+body:not(.dark-theme):not([data-theme]) .page-title {
+    color: var(--primary-color) !important; /* Green color for light theme */
+}
+
+/* Dark theme styles */
+[data-theme="dark"] .page-title,
+body.dark-theme .page-title {
+    color: #ffffff !important; /* White color for dark theme */
+}
+
+/* Additional green text elements that need theme responsiveness */
+.cta-section h2 {
+    transition: color 0.3s ease;
+}
+
+/* Light theme for CTA section heading */
+[data-theme="light"] .cta-section h2,
+body.light-theme .cta-section h2,
+body:not(.dark-theme):not([data-theme]) .cta-section h2 {
+    color: var(--primary-color) !important;
+}
+
+/* Dark theme for CTA section heading */
+[data-theme="dark"] .cta-section h2,
+body.dark-theme .cta-section h2 {
+    color: #ffffff !important;
+}
+
+/* Feature card titles */
+.feature-card h3,
+.seasonal-item h4 {
+    transition: color 0.3s ease;
+}
+
+/* Light theme for feature and seasonal titles */
+[data-theme="light"] .feature-card h3,
+[data-theme="light"] .seasonal-item h4,
+body.light-theme .feature-card h3,
+body.light-theme .seasonal-item h4,
+body:not(.dark-theme):not([data-theme]) .feature-card h3,
+body:not(.dark-theme):not([data-theme]) .seasonal-item h4 {
+    color: var(--text-color) !important;
+}
+
+/* Dark theme for feature and seasonal titles */
+[data-theme="dark"] .feature-card h3,
+[data-theme="dark"] .seasonal-item h4,
+body.dark-theme .feature-card h3,
+body.dark-theme .seasonal-item h4 {
+    color: #ffffff !important;
+}
+
+/* Plant card titles */
+.plant-content h4 {
+    transition: color 0.3s ease;
+}
+
+/* Light theme for plant card titles */
+[data-theme="light"] .plant-content h4,
+body.light-theme .plant-content h4,
+body:not(.dark-theme):not([data-theme]) .plant-content h4 {
+    color: var(--text-color) !important;
+}
+
+/* Dark theme for plant card titles */
+[data-theme="dark"] .plant-content h4,
+body.dark-theme .plant-content h4 {
+    color: #ffffff !important;
+}
+
+/* Testimonial author names */
+.testimonial-author {
+    transition: color 0.3s ease;
+}
+
+/* Light theme for testimonial authors */
+[data-theme="light"] .testimonial-author,
+body.light-theme .testimonial-author,
+body:not(.dark-theme):not([data-theme]) .testimonial-author {
+    color: var(--primary-color) !important;
+}
+
+/* Dark theme for testimonial authors */
+[data-theme="dark"] .testimonial-author,
+body.dark-theme .testimonial-author {
+    color: #ffffff !important;
+}
+
+/* Stats numbers */
+.stat-item h3 {
+    transition: color 0.3s ease;
+}
+
+/* Light theme for stats */
+[data-theme="light"] .stat-item h3,
+body.light-theme .stat-item h3,
+body:not(.dark-theme):not([data-theme]) .stat-item h3 {
+    color: var(--primary-color) !important;
+}
+
+/* Dark theme for stats */
+[data-theme="dark"] .stat-item h3,
+body.dark-theme .stat-item h3 {
+    color: #ffffff !important;
+}
+
+/* Plant prices */
+.plant-price {
+    transition: color 0.3s ease;
+}
+
+/* Light theme for plant prices */
+[data-theme="light"] .plant-price,
+body.light-theme .plant-price,
+body:not(.dark-theme):not([data-theme]) .plant-price {
+    color: var(--primary-color) !important;
+}
+
+/* Dark theme for plant prices */
+[data-theme="dark"] .plant-price,
+body.dark-theme .plant-price {
+    color: #ffffff !important;
+}
+
+/* Feature icons - Keep green in all themes */
+.feature-icon {
+    transition: color 0.3s ease;
+    color: var(--primary-color) !important; /* Always green */
+}
+
+/* Hover states for feature icons - Keep green variations */
+.feature-card:hover .feature-icon {
+    color: var(--secondary-color) !important; /* Green hover for all themes */
+}
+
+/* Plant emojis and icons - Keep natural colors */
+.plant-image,
+.seasonal-icon,
+.testimonials::before,
+.features-section::before,
+.testimonial-card::before {
+    /* Keep natural emoji colors - no color override */
+}
+</style>
+
+<!-- Video Background -->
+<div class="video-background">
+    <video autoplay muted loop playsinline>
+        <source src="/static/WhatsApp Video 2025-07-02 at 12.01.51_a5adb66c.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+<div class="video-overlay"></div>
+
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Welcome to Flaura Botanicals</h1>
+            <p>Transform your space with beautiful, healthy plants. From indoor greenery to outdoor gardens, we nurture nature's finest for your home!</p>
+            <div class="hero-buttons">
+                
+                <a href="{{ url_for('login') }}" class="btn btn-secondary">
+                    <i class="fas fa-seedling"></i> Browse Collection
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="features-section">
+    <div class="container">
+        <h2 class="page-title">Why Choose Flora Botanical?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-seedling feature-icon"></i>
+                <h3>Healthy Plants</h3>
+                <p>All our plants are carefully nurtured and health-checked before delivery. We guarantee vibrant, disease-free plants that will thrive in your space.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-leaf feature-icon"></i>
+                <h3>Expert Care Guide</h3>
+                <p>Receive detailed care instructions with every plant. Our botanists provide personalized tips to help your green friends flourish.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-truck feature-icon"></i>
+                <h3>Safe Delivery</h3>
+                <p>Specially designed packaging ensures your plants arrive safely. We use eco-friendly materials and careful handling for perfect condition delivery.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-heart feature-icon"></i>
+                <h3>Grown with Love</h3>
+                <p>Each plant is cultivated with passion and expertise in our sustainable nursery. We believe in nurturing both plants and planet.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-shield-alt feature-icon"></i>
+                <h3>Quality Guarantee</h3>
+                <p>We stand behind our plants with a satisfaction guarantee. If your plant doesn't thrive, we'll replace it or provide full support.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-coins feature-icon"></i>
+                <h3>Best Prices</h3>
+                <p>Premium quality plants at affordable prices. Enjoy regular seasonal offers and bulk discounts for creating your dream garden.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<section class="plant-preview">
+    <div class="container">
+        <h2 class="page-title">Featured Plants</h2>
+        <div class="plant-preview">
+            <div class="plant-card">
+                <div class="plant-image">🌱</div>
+                <div class="plant-content">
+                    <h4>Monstera Deliciosa</h4>
+                    <p>Perfect for beginners! This stunning houseplant brings tropical vibes to any room with its unique fenestrated leaves.</p>
+                    <div class="plant-price">
+                        ₹599
+                        <span class="plant-care-badge">Easy Care</span>
+                    </div>
+                </div>
+            </div>
+            <div class="plant-card">
+                <div class="plant-image">🌿</div>
+                <div class="plant-content">
+                    <h4>Snake Plant</h4>
+                    <p>The ultimate low-maintenance plant! Thrives in low light and purifies air while adding modern elegance to your space.</p>
+                    <div class="plant-price">
+                        ₹399
+                        <span class="plant-care-badge">Low Light</span>
+                    </div>
+                </div>
+            </div>
+            <div class="plant-card">
+                <div class="plant-image">🌺</div>
+                <div class="plant-content">
+                    <h4>Peace Lily</h4>
+                    <p>Beautiful white blooms and glossy green leaves. Known for its air-purifying qualities and elegant appearance.</p>
+                    <div class="plant-price">
+                        ₹449
+                        <span class="plant-care-badge">Air Purifier</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="seasonal-section">
+    <div class="container">
+        <h2 class="page-title">Seasonal Specialties</h2>
+        <div class="seasonal-grid">
+            <div class="seasonal-item">
+                <span class="seasonal-icon">🌸</span>
+                <h4>Spring Collection</h4>
+                <p>Fresh blooms and vibrant flowering plants to celebrate the season of growth</p>
+            </div>
+            <div class="seasonal-item">
+                <span class="seasonal-icon">☀️</span>
+                <h4>Summer Hardy</h4>
+                <p>Heat-resistant plants that thrive in warm weather and bright sunlight</p>
+            </div>
+            <div class="seasonal-item">
+                <span class="seasonal-icon">🍂</span>
+                <h4>Autumn Beauty</h4>
+                <p>Colorful foliage plants that bring warm autumn tones to your garden</p>
+            </div>
+            <div class="seasonal-item">
+                <span class="seasonal-icon">❄️</span>
+                <h4>Winter Evergreens</h4>
+                <p>Cold-hardy plants that maintain their beauty throughout the winter months</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="testimonials">
+    <div class="container">
+        <h2 class="page-title">What Our Plant Parents Say</h2>
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    Amazing quality plants and excellent packaging! My Monstera arrived in perfect condition and is thriving. Flora Botanical is my go-to plant shop!
+                </p>
+                <p class="testimonial-author">- Priya Sharma</p>
+            </div>
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    The care instructions were so helpful! As a beginner, I was worried about plant care, but their detailed guides made it easy. My plants are flourishing!
+                </p>
+                <p class="testimonial-author">- Rahul Gupta</p>
+            </div>
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    Great variety and competitive prices! I've transformed my balcony into a mini garden with their plants. Delivery was prompt and professional.
+                </p>
+                <p class="testimonial-author">- Anita Verma</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <h2>Ready to Green Your Space?</h2>
+        <p>Join thousands of satisfied customers and start your plant journey with Flora Botanical. Your perfect plant companion awaits!</p>
+        
+    </div>
+</section>
+
+<script>
+    // Add interactive animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Theme-aware video background adjustment
+        function adjustVideoForTheme() {
+            const body = document.body;
+            const video = document.querySelector('.video-background video');
+            const overlay = document.querySelector('.video-overlay');
+            
+            if (!video || !overlay) return;
+            
+            // Check for theme class or attribute
+            const isDarkTheme = body.classList.contains('dark-theme') || 
+                               body.getAttribute('data-theme') === 'dark' ||
+                               document.documentElement.getAttribute('data-theme') === 'dark';
+            
+            if (isDarkTheme) {
+                // Dark theme: more subtle video
+                video.style.opacity = '0.2';
+                video.style.filter = 'blur(0.5px) contrast(0.9) brightness(1.1)';
+                overlay.style.background = `linear-gradient(135deg, 
+                    rgba(45, 90, 39, 0.3) 0%, 
+                    rgba(127, 188, 140, 0.25) 50%, 
+                    rgba(168, 213, 186, 0.3) 100%)`;
+            } else {
+                // Light theme: more visible video
+                video.style.opacity = '0.4';
+                video.style.filter = 'blur(0.5px) contrast(1.2) brightness(0.8)';
+                overlay.style.background = `linear-gradient(135deg, 
+                    rgba(45, 90, 39, 0.25) 0%, 
+                    rgba(127, 188, 140, 0.2) 50%, 
+                    rgba(168, 213, 186, 0.25) 100%)`;
+            }
+        }
+        
+        // Initial adjustment
+        adjustVideoForTheme();
+        
+        // Watch for theme changes
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && 
+                    (mutation.attributeName === 'class' || mutation.attributeName === 'data-theme')) {
+                    adjustVideoForTheme();
+                }
+            });
+        });
+        
+        // Observe body and html for theme changes
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        
+        // Also listen for custom theme change events if your theme switcher dispatches them
+        window.addEventListener('themeChanged', adjustVideoForTheme);
+        document.addEventListener('themeChanged', adjustVideoForTheme);
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.3,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.8s ease forwards';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards and elements
+        document.querySelectorAll('.feature-card, .plant-card, .testimonial-card, .seasonal-item').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Animate stats when visible
+        const statsObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const statNumber = entry.target.querySelector('h3');
+                    const finalNumber = parseInt(statNumber.textContent.replace(/[^\d]/g, ''));
+                    animateNumber(statNumber, finalNumber);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.stat-item').forEach(stat => {
+            statsObserver.observe(stat);
+        });
+    });
+
+    // Number animation function
+    function animateNumber(element, finalNumber) {
+        let currentNumber = 0;
+        const increment = finalNumber / 50;
+        const timer = setInterval(() => {
+            currentNumber += increment;
+            if (currentNumber >= finalNumber) {
+                currentNumber = finalNumber;
+                clearInterval(timer);
+            }
+            
+            const suffix = element.textContent.includes('⭐') ? '⭐' : 
+                          element.textContent.includes('%') ? '%' : '+';
+            element.textContent = Math.floor(currentNumber) + suffix;
+        }, 40);
+    }
+
+    // Add CSS animation keyframes
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes plantGrow {
+            0% { transform: scale(0.8) rotate(-5deg); }
+            50% { transform: scale(1.1) rotate(2deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .plant-card:hover .plant-image {
+            animation: plantGrow 0.6s ease;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Add floating plant icons
+    function createFloatingPlant() {
+        const plants = ['🌱', '🌿', '🍃', '🌾'];
+        const plant = document.createElement('div');
+        plant.innerHTML = plants[Math.floor(Math.random() * plants.length)];
+        plant.style.cssText = `
+            position: fixed;
+            font-size: ${Math.random() * 20 + 15}px;
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: -1;
+            left: ${Math.random() * 100}vw;
+            top: 100vh;
+            animation: floatUp ${Math.random() * 3 + 4}s linear infinite;
+        `;
+        document.body.appendChild(plant);
+        
+        setTimeout(() => plant.remove(), 7000);
+    }
+
+    // Add floating animation
+    const floatStyle = document.createElement('style');
+    floatStyle.textContent = `
+        @keyframes floatUp {
+            to {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(floatStyle);
+
+    // Create floating plants periodically
+    setInterval(createFloatingPlant, 3000);
+</script>
+{% endblock %}

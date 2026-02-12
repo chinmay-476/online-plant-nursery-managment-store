@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-page">
+    <h1 class="page-title">Admin Dashboard</h1>
+    <p class="admin-subtitle">Central control for products, orders, users, and customer support.</p>
+
+    <div class="quick-links">
+        <a class="btn btn-primary" href="{{ url_for('admin_products') }}"><i class="fas fa-box-open"></i> Manage Products</a>
+        <a class="btn btn-primary" href="{{ url_for('admin_orders') }}"><i class="fas fa-receipt"></i> Manage Orders</a>
+        <a class="btn btn-primary" href="{{ url_for('admin_users') }}"><i class="fas fa-users"></i> Manage Users</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_support') }}"><i class="fas fa-headset"></i> Support Desk</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_reviews') }}"><i class="fas fa-star"></i> Review Moderation</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_returns') }}"><i class="fas fa-undo"></i> Returns</a>
+    </div>
+
+    <section class="stats-grid">
+        <article class="card stat-card">
+            <h3>Total Users</h3>
+            <p>{{ total_users }}</p>
+        </article>
+        <article class="card stat-card">
+            <h3>Total Orders</h3>
+            <p>{{ total_orders }}</p>
+        </article>
+        <article class="card stat-card">
+            <h3>Total Revenue</h3>
+            <p>{{ total_revenue|inr }}</p>
+        </article>
+        <article class="card stat-card">
+            <h3>Paid Revenue</h3>
+            <p>{{ paid_revenue|inr }}</p>
+        </article>
+        <article class="card stat-card">
+            <h3>Pending Orders</h3>
+            <p>{{ pending_orders }}</p>
+        </article>
+        <article class="card stat-card">
+            <h3>Open Tickets</h3>
+            <p>{{ open_tickets }}</p>
+        </article>
+        <article class="card stat-card">
+            <h3>Active Products</h3>
+            <p>{{ active_products }}</p>
+        </article>
+        <article class="card stat-card">
+            <h3>Inactive Products</h3>
+            <p>{{ inactive_products }}</p>
+        </article>
+        <article class="card stat-card">
+            <h3>Low Stock Products</h3>
+            <p>{{ low_stock_products }}</p>
+        </article>
+        <article class="card stat-card">
+            <h3>Out Of Stock</h3>
+            <p>{{ out_of_stock_products }}</p>
+        </article>
+        <article class="card stat-card">
+            <h3>Stock Alerts</h3>
+            <p>{{ stock_alert_subscriptions }}</p>
+        </article>
+    </section>
+
+    <div class="insight-grid">
+        <section class="card">
+            <h2><i class="fas fa-chart-pie"></i> Top Categories</h2>
+            {% if top_categories %}
+            <div class="simple-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Products</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category, count in top_categories %}
+                        <tr>
+                            <td>{{ category }}</td>
+                            <td>{{ count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="empty-note">No category data available.</p>
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <h2><i class="fas fa-trophy"></i> Top Selling Products</h2>
+            {% if top_selling %}
+            <div class="simple-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Units</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in top_selling %}
+                        <tr>
+                            <td>{{ row.name }}</td>
+                            <td>{{ row.units }}</td>
+                            <td>{{ row.revenue|inr }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="empty-note">No sales recorded yet.</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <section class="card">
+        <h2><i class="fas fa-clock"></i> Recent Orders</h2>
+        {% if recent_orders %}
+        <div class="simple-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.customer_name }}</td>
+                        <td>{{ order.plant_name }}</td>
+                        <td>{{ order.order_status.replace('_', ' ')|title }}</td>
+                        <td>{{ order.payment_status.replace('_', ' ')|title }}</td>
+                        <td>{{ order.grand_total|inr }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty-note">No orders available.</p>
+        {% endif %}
+    </section>
+</div>
+
+<style>
+    .admin-page {
+        max-width: 1180px;
+        margin: 0 auto;
+    }
+
+    .admin-subtitle {
+        text-align: center;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+    }
+
+    .quick-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 18px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .stat-card h3 {
+        margin: 0;
+        font-size: 0.95rem;
+        color: var(--text-muted);
+    }
+
+    .stat-card p {
+        margin: 6px 0 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .insight-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .simple-table {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px 8px;
+        text-align: left;
+        font-size: 0.9rem;
+    }
+
+    th {
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .empty-note {
+        color: var(--text-muted);
+    }
+
+    @media (max-width: 900px) {
+        .insight-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

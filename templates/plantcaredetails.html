@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1 class="page-title">How to Maintain Different Types of Plants</h1>
+
+    <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+        <!-- Indoor Plants -->
+        <div class="card">
+            <h2 style="color: var(--primary-color); margin-bottom: 1rem;">Indoor Plants</h2>
+            <p>Indoor plants thrive in indirect sunlight and require moderate watering. Avoid overwatering, and ensure proper air circulation.</p>
+            <ul style="margin-top: 1rem; color: var(--text-muted);">
+                <li>Water every 7-10 days</li>
+                <li>Use well-draining soil</li>
+                <li>Wipe leaves occasionally</li>
+            </ul>
+        </div>
+
+        <!-- Outdoor Plants -->
+        <div class="card">
+            <h2 style="color: var(--primary-color); margin-bottom: 1rem;">Outdoor Plants</h2>
+            <p>Outdoor plants need direct sunlight and more frequent watering, especially in summer. Protect them from harsh winds and pests.</p>
+            <ul style="margin-top: 1rem; color: var(--text-muted);">
+                <li>Water every 3-4 days</li>
+                <li>Fertilize monthly</li>
+                <li>Provide adequate sunlight</li>
+            </ul>
+        </div>
+
+        <!-- Succulents -->
+        <div class="card">
+            <h2 style="color: var(--primary-color); margin-bottom: 1rem;">Succulents</h2>
+            <p>Succulents require minimal water and plenty of bright, indirect light. They are sensitive to overwatering, which can cause root rot.</p>
+            <ul style="margin-top: 1rem; color: var(--text-muted);">
+                <li>Water every 2-3 weeks</li>
+                <li>Use cactus mix soil</li>
+                <li>Ensure good drainage</li>
+            </ul>
+        </div>
+
+        <!-- Flowering Plants -->
+        <div class="card">
+            <h2 style="color: var(--primary-color); margin-bottom: 1rem;">Flowering Plants</h2>
+            <p>Flowering plants need regular pruning, balanced sunlight, and frequent watering. Deadhead spent flowers to encourage new blooms.</p>
+            <ul style="margin-top: 1rem; color: var(--text-muted);">
+                <li>Water every 4-5 days</li>
+                <li>Prune regularly</li>
+                <li>Use blooming fertilizer</li>
+            </ul>
+        </div>
+
+        <!-- Herbs -->
+        <div class="card">
+            <h2 style="color: var(--primary-color); margin-bottom: 1rem;">Herbs</h2>
+            <p>Herbs require well-drained soil, regular harvesting, and moderate watering. Most herbs prefer full sunlight for at least 6 hours a day.</p>
+            <ul style="margin-top: 1rem; color: var(--text-muted);">
+                <li>Water every 2-3 days</li>
+                <li>Harvest often to promote growth</li>
+                <li>Use organic soil</li>
+            </ul>
+        </div>
+    </div>
+{% endblock content %}

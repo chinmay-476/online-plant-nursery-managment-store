@@ -1,0 +1,516 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card card">
+        <div class="login-header">
+            <div class="login-icon">
+                <i class="fas fa-seedling"></i>
+            </div>
+            <h2>Welcome Back to Flora</h2>
+            <p>Sign in to your botanical paradise</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('login') }}" class="login-form">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.email.label(class="form-label") }}
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope input-icon"></i>
+                    {{ form.email(class="form-control", placeholder="Enter your email address") }}
+                </div>
+                {% if form.email.errors %}
+                    <div class="error-message">
+                        {% for error in form.email.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.password.label(class="form-label") }}
+                <div class="input-wrapper">
+                    <i class="fas fa-lock input-icon"></i>
+                    {{ form.password(class="form-control", type="password", placeholder="Enter your password") }}
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="password-eye"></i>
+                    </button>
+                </div>
+                {% if form.password.errors %}
+                    <div class="error-message">
+                        {% for error in form.password.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" name="remember_me">
+                    <span class="checkmark"></span>
+                    Remember me
+                </label>
+                <a href="/signup" class="forgot-password">Forgot Password?</a>
+            </div>
+
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary login-btn") }}
+            </div>
+        </form>
+
+        <div class="login-footer">
+            <p>Don't have an account? <a href="{{ url_for('signup') }}" class="signup-link">Sign up here</a></p>
+        </div>
+
+        <div class="login-decoration">
+            <div class="plant-left">🌿</div>
+            <div class="plant-right">🌱</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        padding: 2rem 0;
+    }
+
+    .login-card {
+        max-width: 450px;
+        width: 100%;
+        position: relative;
+        overflow: visible;
+        background: var(--surface-color);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(127, 188, 140, 0.2);
+    }
+
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--light-green), var(--accent-color), var(--primary-color));
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease infinite;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .login-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 8px 25px rgba(45, 90, 39, 0.3);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .login-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .login-header h2 {
+        font-size: 2.2rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .login-header p {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .login-form {
+        margin-bottom: 2rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.8rem;
+        font-weight: 600;
+        color: var(--text-color);
+        font-size: 1.1rem;
+    }
+
+    .input-wrapper {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1.2rem;
+        z-index: 2;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 16px 20px 16px 55px;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(45, 90, 39, 0.1);
+        background: var(--surface-color);
+        transform: translateY(-2px);
+    }
+
+    .form-control:focus + .input-icon {
+        color: var(--primary-color);
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 1.2rem;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+
+    .password-toggle:hover {
+        color: var(--primary-color);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .remember-me {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 1rem;
+        color: var(--text-color);
+        position: relative;
+    }
+
+    .remember-me input {
+        opacity: 0;
+        position: absolute;
+        width: 0;
+        height: 0;
+    }
+
+    .checkmark {
+        width: 20px;
+        height: 20px;
+        background: var(--bg-color);
+        border: 2px solid var(--border-color);
+        border-radius: 4px;
+        margin-right: 10px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .remember-me input:checked ~ .checkmark {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .remember-me input:checked ~ .checkmark::after {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 2px;
+        width: 6px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .forgot-password {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .forgot-password:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+
+    .login-btn {
+        width: 100%;
+        padding: 18px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-top: 1rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        border-radius: 12px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(45, 90, 39, 0.4);
+        background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    }
+
+    .login-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .login-btn:hover::before {
+        left: 100%;
+    }
+
+    .login-footer {
+        text-align: center;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .login-footer p {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .signup-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .signup-link:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+
+    .login-decoration {
+        position: absolute;
+        pointer-events: none;
+    }
+
+    .plant-left {
+        position: absolute;
+        top: -20px;
+        left: -30px;
+        font-size: 4rem;
+        opacity: 0.1;
+        transform: rotate(-15deg);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .plant-right {
+        position: absolute;
+        bottom: -20px;
+        right: -30px;
+        font-size: 3rem;
+        opacity: 0.1;
+        transform: rotate(15deg);
+        animation: float 6s ease-in-out infinite reverse;
+    }
+
+    .error-message {
+        color: var(--danger-color);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .error-message span {
+        display: block;
+        margin-bottom: 0.3rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .login-container {
+            padding: 1rem;
+            min-height: 70vh;
+        }
+
+        .login-card {
+            margin: 1rem;
+            padding: 2rem 1.5rem;
+        }
+
+        .login-header h2 {
+            font-size: 1.8rem;
+        }
+
+        .form-options {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .plant-left, .plant-right {
+            display: none;
+        }
+    }
+
+    /* Dark theme adjustments */
+    [data-theme="dark"] .login-card {
+        background: var(--surface-color);
+        border-color: rgba(127, 188, 140, 0.3);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    [data-theme="dark"] .form-control {
+        background: var(--bg-color);
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .form-control:focus {
+        background: var(--surface-color);
+        box-shadow: 0 0 0 4px rgba(127, 188, 140, 0.2);
+    }
+</style>
+
+<script>
+    function togglePassword() {
+        const passwordField = document.querySelector('input[name="password"]');
+        const passwordEye = document.getElementById('password-eye');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            passwordEye.className = 'fas fa-eye-slash';
+        } else {
+            passwordField.type = 'password';
+            passwordEye.className = 'fas fa-eye';
+        }
+    }
+
+    // Add floating animation to form elements
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginCard = document.querySelector('.login-card');
+        
+        // Add entrance animation
+        loginCard.style.opacity = '0';
+        loginCard.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            loginCard.style.transition = 'all 0.6s ease';
+            loginCard.style.opacity = '1';
+            loginCard.style.transform = 'translateY(0)';
+        }, 100);
+
+        // Enhanced form validation
+        const form = document.querySelector('.login-form');
+        const inputs = form.querySelectorAll('.form-control');
+        
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() === '') {
+                    this.style.borderColor = 'var(--danger-color)';
+                    this.style.boxShadow = '0 0 0 4px rgba(220, 53, 69, 0.1)';
+                } else {
+                    this.style.borderColor = 'var(--success-color)';
+                    this.style.boxShadow = '0 0 0 4px rgba(40, 167, 69, 0.1)';
+                }
+            });
+        });
+
+        // Add ripple effect to login button
+        const loginBtn = document.querySelector('.login-btn');
+        loginBtn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(255,255,255,0.3)';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.pointerEvents = 'none';
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Add keyframe for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

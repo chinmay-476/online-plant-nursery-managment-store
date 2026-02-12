@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="history-page">
+    <h1 class="page-title">Order History</h1>
+
+    {% if orders %}
+        <div class="history-list">
+            {% for order in orders %}
+            <article class="card history-item">
+                <div class="history-item-main">
+                    <img src="{{ url_for('static', filename='images/' + order.plant_image) }}" alt="{{ order.plant_name }}">
+                    <div>
+                        <h3>{{ order.plant_name }}</h3>
+                        <p>Order #{{ order.id }} | {{ order.order_date.strftime('%d %b %Y, %I:%M %p') }}</p>
+                        <p>Tracking: {{ order.tracking_code or 'Pending' }}</p>
+                        <p>Qty: {{ order.quantity }} | Unit: {{ order.unit_price|inr }}</p>
+                        {% if order.coupon_discount and order.coupon_discount > 0 %}
+                            <p class="saving-note">
+                                Coupon Saved: {{ order.coupon_discount|inr }}
+                                {% if order.coupon_code %}({{ order.coupon_code }}){% endif %}
+                            </p>
+                        {% endif %}
+                        <p><strong>Total: {{ order.grand_total|inr }}</strong></p>
+                        {% set ret = return_by_order.get(order.id) %}
+                        {% if ret %}
+                            <p class="saving-note">Return: {{ return_status_labels.get(ret.status, ret.status|title) }}</p>
+                            {% if ret.admin_note %}<p>{{ ret.admin_note }}</p>{% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="history-item-status">
+                    <span class="status-badge">{{ order.order_status.replace('_', ' ')|title }}</span>
+                    <span class="payment-badge">{{ order.payment_status.replace('_', ' ')|title }}</span>
+                    <span class="method-badge">{{ order.payment_method|upper }}</span>
+                </div>
+
+                <div class="history-item-footer">
+                    <a class="btn btn-secondary" href="{{ url_for('plant_detail', plant_id=order.base_plant_id, variant=order.variant_code) }}">
+                        View Plant
+                    </a>
+                    <a class="btn btn-primary" href="{{ url_for('deliveryinfo', plant_id=order.base_plant_id, variant=order.variant_code, quantity=order.quantity) }}">
+                        Reorder
+                    </a>
+                    <a class="btn btn-secondary" href="{{ url_for('track_order', order_id=order.id) }}">
+                        Track
+                    </a>
+                    {% if not ret or ret.status in ['rejected', 'refunded'] %}
+                    <form method="POST" action="{{ url_for('request_return', order_id=order.id) }}" style="display:grid;gap:6px;min-width:260px;">
+                        <input type="text" name="reason" placeholder="Return reason (short)" required>
+                        <textarea name="details" rows="2" placeholder="Details..." required></textarea>
+                        <button class="btn btn-secondary" type="submit">Request Return</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card empty-history">
+            <h3>No orders yet</h3>
+            <p>Your completed orders will appear here.</p>
+            <a href="{{ url_for('showproduct') }}" class="btn btn-primary">Start Shopping</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .history-page {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .history-list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .history-item {
+        display: grid;
+        gap: 12px;
+    }
+
+    .history-item-main {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .history-item-main img {
+        width: 96px;
+        height: 96px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .history-item-status {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .status-badge,
+    .payment-badge,
+    .method-badge {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+    }
+
+    .status-badge {
+        background: rgba(40, 167, 69, 0.12);
+        border-color: rgba(40, 167, 69, 0.3);
+    }
+
+    .payment-badge {
+        background: rgba(23, 162, 184, 0.12);
+        border-color: rgba(23, 162, 184, 0.3);
+    }
+
+    .method-badge {
+        background: rgba(255, 193, 7, 0.15);
+        border-color: rgba(255, 193, 7, 0.35);
+    }
+
+    .history-item-footer {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .saving-note {
+        color: var(--success-color);
+        font-weight: 600;
+    }
+
+    .empty-history {
+        text-align: center;
+    }
+
+    @media (max-width: 640px) {
+        .history-item-main {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .history-item-main img {
+            width: 100%;
+            height: 180px;
+        }
+    }
+</style>
+{% endblock %}

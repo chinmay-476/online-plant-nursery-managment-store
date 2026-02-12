@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-login-wrap">
+    <section class="card admin-login-card">
+        <h1><i class="fas fa-user-shield"></i> Admin Portal Login</h1>
+        <p class="subtitle">Separate sign-in for admin dashboard, support desk, and operations.</p>
+
+        <form method="POST" action="{{ url_for('admin_login') }}" class="admin-login-form">
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="next" value="{{ next_url }}">
+
+            <div class="form-group">
+                {{ form.email.label(class="form-label") }}
+                {{ form.email(class="form-control", placeholder="Admin email") }}
+                {% if form.email.errors %}
+                    <small class="field-error">{{ form.email.errors[0] }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.password.label(class="form-label") }}
+                {{ form.password(class="form-control", placeholder="Admin password") }}
+                {% if form.password.errors %}
+                    <small class="field-error">{{ form.password.errors[0] }}</small>
+                {% endif %}
+            </div>
+
+            <div class="actions">
+                {{ form.submit(class="btn btn-primary", value="Admin Login") }}
+                <a class="btn btn-secondary" href="{{ url_for('login') }}">Customer Login</a>
+            </div>
+        </form>
+    </section>
+</div>
+
+<style>
+    .admin-login-wrap {
+        min-height: 70vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .admin-login-card {
+        width: 100%;
+        max-width: 520px;
+    }
+
+    .admin-login-card h1 {
+        margin: 0 0 8px;
+        font-size: 1.8rem;
+        color: var(--primary-color);
+    }
+
+    .admin-login-card .subtitle {
+        margin: 0 0 18px;
+        color: var(--text-muted);
+    }
+
+    .admin-login-form .actions {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .field-error {
+        color: var(--danger-color);
+        display: block;
+        margin-top: 4px;
+    }
+</style>
+{% endblock %}

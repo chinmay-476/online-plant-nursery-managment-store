@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dev-docs">
+    <h1 class="page-title">Developer Documentation</h1>
+    <p class="lead">
+        Maintainer-focused reference for architecture, setup, core flows, data model, and route inventory.
+    </p>
+
+    <section class="card section">
+        <h2><i class="fas fa-code-branch"></i> Architecture</h2>
+        <ul>
+            <li><strong>Backend:</strong> Flask app with server-rendered Jinja templates.</li>
+            <li><strong>ORM:</strong> Flask-SQLAlchemy models in <code>app.py</code>.</li>
+            <li><strong>Session Auth:</strong> User login state kept in Flask session.</li>
+            <li><strong>Catalog Source:</strong> Static plant metadata dictionary in <code>plants.py</code>.</li>
+        </ul>
+    </section>
+
+    <section class="card section">
+        <h2><i class="fas fa-box-open"></i> Key Features</h2>
+        <ul>
+            <li>Secure auth with password hashing.</li>
+            <li>Wishlist (browser localStorage) + server-side cart.</li>
+            <li>Delivery -> payment -> order success checkout pipeline.</li>
+            <li>Order history for authenticated users.</li>
+        </ul>
+    </section>
+
+    <section class="card section">
+        <h2><i class="fas fa-database"></i> Data Model</h2>
+        <div class="table-wrap">
+            <table class="docs-table">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Purpose</th>
+                        <th>Important Fields</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Store</code></td>
+                        <td>User accounts</td>
+                        <td><code>id</code>, <code>name</code>, <code>email</code>, <code>password</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>CartItem</code></td>
+                        <td>User cart entries</td>
+                        <td><code>user_id</code>, <code>plant_id</code>, <code>quantity</code>, <code>unit_price</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>Order</code></td>
+                        <td>Placed orders and payment state</td>
+                        <td><code>user_id</code>, <code>plant_id</code>, <code>quantity</code>, <code>grand_total</code>, <code>payment_status</code>, <code>order_status</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card section">
+        <h2><i class="fas fa-cogs"></i> Environment and Runtime</h2>
+        <p><strong>Active DB URI:</strong> <code>{{ database_uri }}</code></p>
+        <pre class="code-block"># .env example
+SECRET_KEY=change-me
+DATABASE_URL=sqlite:///instance/stor.db
+FLASK_DEBUG=false
+SESSION_COOKIE_SECURE=false</pre>
+    </section>
+
+    <section class="card section">
+        <h2><i class="fas fa-play-circle"></i> Local Setup</h2>
+        <pre class="code-block">pip install -r requirements.txt
+python app.py</pre>
+    </section>
+
+    <section class="card section">
+        <h2><i class="fas fa-route"></i> Route Inventory</h2>
+        <div class="table-wrap">
+            <table class="docs-table">
+                <thead>
+                    <tr>
+                        <th>Path</th>
+                        <th>Methods</th>
+                        <th>Endpoint</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for route in route_details %}
+                    <tr>
+                        <td><code>{{ route.path }}</code></td>
+                        <td>{{ route.methods }}</td>
+                        <td><code>{{ route.endpoint }}</code></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card section">
+        <h2><i class="fas fa-link"></i> Related Docs</h2>
+        <p>
+            <a href="{{ url_for('project_documentation') }}">Project Documentation</a> |
+            <a href="/DATABASE_DOCUMENTATION.md">Database Documentation (file)</a>
+        </p>
+    </section>
+</div>
+
+<style>
+    .dev-docs {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .lead {
+        text-align: center;
+        color: var(--text-muted);
+        margin: -1rem auto 2rem;
+        max-width: 860px;
+    }
+
+    .section {
+        margin-bottom: 1.3rem;
+    }
+
+    .section h2 {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        color: var(--primary-color);
+        margin-bottom: 0.9rem;
+    }
+
+    .section ul {
+        padding-left: 18px;
+    }
+
+    .section li {
+        margin: 6px 0;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    .docs-table {
+        width: 100%;
+        min-width: 760px;
+        border-collapse: collapse;
+    }
+
+    .docs-table th,
+    .docs-table td {
+        border: 1px solid var(--border-color);
+        padding: 10px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .docs-table th {
+        background: var(--bg-color);
+    }
+
+    .code-block {
+        background: #102117;
+        color: #ddffe9;
+        border-radius: 12px;
+        padding: 14px;
+        overflow-x: auto;
+    }
+
+    @media (max-width: 768px) {
+        .dev-docs {
+            padding: 0 6px;
+        }
+    }
+</style>
+{% endblock %}

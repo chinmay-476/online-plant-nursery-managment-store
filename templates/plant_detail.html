@@ -1,0 +1,1570 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+<div class="plant-detail-container">
+    <div class="breadcrumb">
+        <a href="{{ url_for('home') }}"><i class="fas fa-home"></i> Home</a>
+        <span class="separator">></span>
+        <a href="{{ url_for('showproduct') }}"><i class="fas fa-leaf"></i> Plants</a>
+        <span class="separator">></span>
+        <span class="current">{{ plant.name }}</span>
+    </div>
+
+    <div class="plant-detail-card">
+        <div class="plant-image-section">
+            <div class="plant-image-container">
+                <img src="{{ url_for('static', filename='images/' + plant.image) }}" alt="{{ plant.name }}"
+                    class="plant-image" id="mainImage">
+
+                {% if plant.get('offer') %}
+                <div class="badge offer-badge">
+                    <i class="fas fa-tag"></i> Special Offer
+                </div>
+                {% endif %}
+
+                {% if plant.get('new') %}
+                <div class="badge new-badge">
+                    <i class="fas fa-star"></i> New Arrival
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="image-gallery">
+                <div class="thumbnail active"
+                    onclick="changeImage(`{{ url_for('static', filename='images/' + plant.image) }}`)">
+                    <img src="{{ url_for('static', filename='images/' + plant.image) }}" alt="Main view">
+                </div>
+                <!-- Additional thumbnails could be added here -->
+            </div>
+        </div>
+
+        <div class="plant-info-section">
+            <div class="plant-header">
+                <h1 class="plant-name">{{ plant.name }}</h1>
+                <div class="category-tag">
+                    <i class="fas fa-tag"></i> {{ plant.category }}
+                </div>
+            </div>
+
+            <div class="price-section">
+                <span class="current-price" id="variantPrice">{{ selected_variant.price_value|inr }}</span>
+                {% if selected_variant.mrp_value > selected_variant.price_value %}
+                <span class="original-price" id="variantMrp">{{ selected_variant.mrp_value|inr }}</span>
+                {% endif %}
+                {% if selected_variant.discount_percent > 0 %}
+                <span class="discount-tag" id="variantDiscount">{{ selected_variant.discount_percent }}% OFF</span>
+                {% endif %}
+            </div>
+
+            <div class="marketplace-meta">
+                <div class="meta-row">
+                    <span class="rating-chip"><i class="fas fa-star"></i> {{ "%.1f"|format(plant.rating) }}</span>
+                    <span class="meta-muted">{{ plant.rating_count }} ratings</span>
+                    {% if plant.assured %}
+                    <span class="assured-chip"><i class="fas fa-check-circle"></i> Flora Assured</span>
+                    {% endif %}
+                </div>
+                <div class="meta-row">
+                    <span class="meta-muted"><i class="fas fa-truck"></i> {{ plant.delivery_text }}</span>
+                    {% if plant.low_stock %}
+                        <span class="stock-note">Only {{ plant.stock }} left</span>
+                    {% elif not plant.in_stock %}
+                        <span class="stock-note out">Out of stock</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="promise-grid">
+                <div class="promise-item"><i class="fas fa-undo"></i> 7-day replacement</div>
+                <div class="promise-item"><i class="fas fa-lock"></i> 100% secure payments</div>
+                <div class="promise-item"><i class="fas fa-headset"></i> Dedicated plant support</div>
+            </div>
+
+            <div class="promise-grid">
+                <div class="promise-item"><i class="fas fa-sun"></i> {{ plant.sunlight_label }}</div>
+                <div class="promise-item"><i class="fas fa-tint"></i> {{ plant.watering_label }}</div>
+                <div class="promise-item"><i class="fas fa-star"></i> {{ plant.difficulty_label }} Care</div>
+            </div>
+            <div class="promise-grid">
+                <div class="promise-item"><i class="fas fa-paw"></i> {% if plant.pet_safe %}Pet Safe{% else %}Not Pet Safe{% endif %}</div>
+                <div class="promise-item"><i class="fas fa-wind"></i> {% if plant.air_purifying %}Air Purifying{% else %}Decorative Plant{% endif %}</div>
+            </div>
+
+            <div class="plant-description">
+                <h3><i class="fas fa-info-circle"></i> About This Plant</h3>
+                <div class="description-content">
+                    {% if 'snake-plant' in request.endpoint or 'Snake Plant' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> Perfect for beginners and busy plant parents, it thrives on
+                        neglect and can survive in low light conditions. NASA studies show it's one of the top
+                        air-purifying plants, removing toxins like formaldehyde and benzene from your home.</p>
+                    {% elif 'peace-lily' in request.endpoint or 'Peace Lily' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> Not only does it purify the air by removing harmful toxins,
+                        but it also acts as a natural humidity indicator - drooping slightly when it needs water. Its
+                        beautiful white flowers make it a stunning decorative piece.</p>
+                    {% elif 'spider-plant' in request.endpoint or 'Spider Plant' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> Incredibly easy to propagate - you can create new plants
+                        from the babies! It's pet-safe, air-purifying, and adapts to various lighting conditions.
+                        Perfect for hanging baskets or as a tabletop centerpiece.</p>
+                    {% elif 'hibiscus' in request.endpoint or 'Hibiscus' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> Each flower is a masterpiece that lasts just one day, but
+                        the plant continuously produces new blooms throughout the growing season. It attracts
+                        butterflies and hummingbirds, making your garden a wildlife haven.</p>
+                    {% elif 'bougainvillea' in request.endpoint or 'Bougainvillea' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> Once established, it's incredibly low-maintenance and
+                        drought-resistant. The vibrant colors last for months, providing year-round interest. It's
+                        perfect for creating privacy screens or dramatic garden focal points.</p>
+                    {% elif 'rose' in request.endpoint or 'Rose' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> From classic red roses to unique multicolored varieties,
+                        there's a rose for every garden style. Many varieties offer intoxicating fragrances that perfume
+                        your entire garden. Perfect for cutting gardens and romantic landscapes.</p>
+                    {% elif 'lantana' in request.endpoint or 'Lantana' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> Extremely drought-tolerant once established, it thrives in
+                        hot, sunny conditions where other plants struggle. It's a butterfly magnet and requires minimal
+                        care while providing maximum impact.</p>
+                    {% elif 'tulsi' in request.endpoint or 'Tulsi' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> Beyond its spiritual significance, Tulsi leaves can be used
+                        to make healing teas, natural remedies, and aromatic potpourri. It's easy to grow and naturally
+                        repels insects while attracting beneficial pollinators.</p>
+                    {% elif 'mint' in request.endpoint or 'Mint' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> Perfect for teas, cocktails, desserts, and savory dishes. It
+                        grows rapidly and can be harvested continuously. The refreshing scent naturally deters ants and
+                        mice while attracting beneficial insects.</p>
+                    {% elif 'aloe-vera' in request.endpoint or 'Aloe Vera' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> It's like having a first-aid kit in your garden! The gel
+                        soothes burns, cuts, and skin irritations. Incredibly low-maintenance and drought-tolerant, it
+                        thrives with minimal care while producing occasional spikes of orange or yellow flowers.</p>
+                    {% elif 'curry-leaf' in request.endpoint or 'Curry Leaf' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> Fresh curry leaves elevate any Indian dish with their unique
+                        flavor that dried leaves simply can't match. The plant is easy to grow and provides a continuous
+                        harvest of fresh leaves for your culinary adventures.</p>
+                    {% elif 'lemongrass' in request.endpoint or 'Lemongrass' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> Perfect for teas, Asian cuisine, and natural pest control.
+                        The stalks can be harvested for cooking, while the strong citrus scent keeps mosquitoes at bay.
+                        It's drought-tolerant and adds tropical flair to any landscape.</p>
+                    {% elif 'jasmine' in request.endpoint or 'Jasmine' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> The flowers are traditionally used in religious ceremonies,
+                        hair decorations, and perfume making. The sweet fragrance is so powerful that just one plant can
+                        perfume an entire garden area. It's also believed to attract positive energy.</p>
+                    {% elif 'marigold' in request.endpoint or 'Marigold' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> They're incredibly easy to grow from seed and bloom
+                        continuously until frost. Natural pest deterrents, they protect other plants from harmful
+                        insects. The flowers are edible and are used in traditional Indian festivals and ceremonies.</p>
+                    {% elif 'chrysanthemum' in request.endpoint or 'Chrysanthemum' in plant.name %}
+
+                    <p><strong>Why You'll Love It:</strong> They provide spectacular color when most other flowers are
+                        fading. Available in numerous flower forms from tiny buttons to large decorative blooms. Many
+                        varieties are perennial, returning year after year with proper care.</p>
+                    {% else %}
+                    <p>{{ plant.description }}</p>
+                    <p>This beautiful plant will make a wonderful addition to your home or garden. With proper care, it
+                        will thrive and bring you joy for years to come.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+
+
+
+
+            <div class="total-price">
+                <span class="total-label">Total Price:</span>
+                <span class="total-amount" id="totalPrice">{{ plant.price }}</span>
+            </div>
+            <div class="order-section">
+                <div class="quantity-selector">
+                    <label for="variantSelect"><i class="fas fa-layer-group"></i> Variant:</label>
+                    <select id="variantSelect" class="form-control" onchange="updateVariant()">
+                        {% for variant in plant.variants %}
+                        <option
+                            value="{{ variant.code }}"
+                            data-price="{{ variant.price_value }}"
+                            data-mrp="{{ variant.mrp_value }}"
+                            data-discount="{{ variant.discount_percent }}"
+                            data-stock="{{ variant.stock }}"
+                            {% if selected_variant.code == variant.code %}selected{% endif %}
+                        >
+                            {{ variant.label }} - {{ variant.price_value|inr }}{% if not variant.in_stock %} (Out of stock){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="quantity-selector">
+                    <label for="quantity"><i class="fas fa-shopping-cart"></i> Quantity:</label>
+                    <div class="quantity-controls">
+                        <button type="button" class="qty-btn" onclick="decreaseQuantity()">-</button>
+                        <input type="number" id="quantity" value="1" min="1" max="10" onchange="updateTotal()">
+                        <button type="button" class="qty-btn" onclick="increaseQuantity()">+</button>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary order-btn" onclick="orderNow()">
+                        <i class="fas fa-shopping-cart"></i> Order Now
+                    </button>
+                    <button class="btn btn-secondary" onclick="addToCart()">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                    <button class="btn btn-secondary wishlist-btn" onclick="addCurrentPlantToWishlist()">
+                        <i class="fas fa-heart"></i> Add to Wishlist
+                    </button>
+                </div>
+                {% if not selected_variant.in_stock and user_logged_in %}
+                <form method="POST" action="{{ url_for('subscribe_stock_alert', plant_id=plant_key) }}" style="margin-top:10px;">
+                    <button class="btn btn-secondary" type="submit"><i class="fas fa-bell"></i> Notify When In Stock</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Information Tabs -->
+    <div class="info-tabs">
+        <div class="tab-headers">
+            <button class="tab-header active" onclick="showTab('benefits')">
+                <i class="fas fa-leaf"></i> Benefits
+            </button>
+            <button class="tab-header" onclick="showTab('placement')">
+                <i class="fas fa-home"></i> Placement Tips
+            </button>
+            <button class="tab-header" onclick="showTab('troubleshooting')">
+                <i class="fas fa-tools"></i> Troubleshooting
+            </button>
+        </div>
+
+        <div class="tab-content">
+            <div id="benefits" class="tab-pane active">
+                <h4>Why Choose This Plant?</h4>
+                <ul class="benefits-list">
+                    {% if plant.category == 'Indoor' %}
+                    <li><i class="fas fa-wind"></i> Purifies indoor air naturally</li>
+                    <li><i class="fas fa-moon"></i> Releases oxygen at night</li>
+                    <li><i class="fas fa-home"></i> Perfect for home decor</li>
+                    <li><i class="fas fa-battery-full"></i> Low maintenance required</li>
+                    {% elif plant.category == 'Herbs' %}
+                    <li><i class="fas fa-leaf"></i> Fresh herbs for cooking</li>
+                    <li><i class="fas fa-heart"></i> Natural medicinal properties</li>
+                    <li><i class="fas fa-bug"></i> Natural pest deterrent</li>
+                    <li><i class="fas fa-recycle"></i> Sustainable living choice</li>
+                    {% else %}
+                    <li><i class="fas fa-rainbow"></i> Adds vibrant color to garden</li>
+                    <li><i class="fas fa-butterfly"></i> Attracts beneficial insects</li>
+                    <li><i class="fas fa-sun"></i> Weather resistant variety</li>
+                    <li><i class="fas fa-calendar-alt"></i> Long blooming season</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div id="placement" class="tab-pane">
+                <h4>Perfect Placement Ideas</h4>
+                <div class="placement-grid">
+                    {% if plant.category == 'Indoor' %}
+                    <div class="placement-item">
+                        <i class="fas fa-couch"></i>
+                        <span>Living Room</span>
+                        <small>Near windows for bright light</small>
+                    </div>
+                    <div class="placement-item">
+                        <i class="fas fa-bed"></i>
+                        <span>Bedroom</span>
+                        <small>Improves air quality while you sleep</small>
+                    </div>
+                    <div class="placement-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Office Space</span>
+                        <small>Reduces stress and increases productivity</small>
+                    </div>
+                    {% else %}
+                    <div class="placement-item">
+                        <i class="fas fa-tree"></i>
+                        <span>Garden Border</span>
+                        <small>Perfect for landscape edges</small>
+                    </div>
+                    <div class="placement-item">
+                        <i class="fas fa-home"></i>
+                        <span>Entrance</span>
+                        <small>Welcome guests with beauty</small>
+                    </div>
+                    <div class="placement-item">
+                        <i class="fas fa-seedling"></i>
+                        <span>Containers</span>
+                        <small>Great for patio and balcony</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div id="troubleshooting" class="tab-pane">
+                <h4>Common Issues & Solutions</h4>
+                <div class="troubleshooting-list">
+                    <div class="issue-item">
+                        <div class="issue-problem">
+                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                            <strong>Yellowing Leaves</strong>
+                        </div>
+                        <div class="issue-solution">
+                            Usually indicates overwatering. Allow soil to dry between waterings.
+                        </div>
+                    </div>
+                    <div class="issue-item">
+                        <div class="issue-problem">
+                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                            <strong>Brown Leaf Tips</strong>
+                        </div>
+                        <div class="issue-solution">
+                            Low humidity or water quality issues. Use filtered water and increase humidity.
+                        </div>
+                    </div>
+                    <div class="issue-item">
+                        <div class="issue-problem">
+                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                            <strong>Slow Growth</strong>
+                        </div>
+                        <div class="issue-solution">
+                            Insufficient light or nutrients. Move to brighter location and fertilize monthly.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if recommended_plants %}
+    <section class="recommendations card">
+        <h3><i class="fas fa-store"></i> Similar Picks You May Like</h3>
+        <div class="recommendation-grid">
+            {% for rec in recommended_plants %}
+            <a class="recommendation-item" href="{{ url_for('plant_detail', plant_id=rec.id) }}">
+                <img src="{{ url_for('static', filename='images/' + rec.image) }}" alt="{{ rec.name }}">
+                <div>
+                    <h4>{{ rec.name }}</h4>
+                    <p><i class="fas fa-star"></i> {{ "%.1f"|format(rec.rating) }} ({{ rec.rating_count }})</p>
+                    <p class="price">{{ rec.price }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="card" style="margin-top:16px;">
+        <h3><i class="fas fa-star"></i> Customer Reviews ({{ review_count }})</h3>
+        {% if user_logged_in and verified_purchase %}
+        <form method="POST" action="{{ url_for('submit_product_review', plant_id=plant_key) }}" style="margin:12px 0;">
+            <div class="row" style="display:grid;grid-template-columns:120px 1fr;gap:10px;">
+                <select class="form-control" name="rating" required>
+                    <option value="">Rating</option>
+                    <option value="5">5 Stars</option>
+                    <option value="4">4 Stars</option>
+                    <option value="3">3 Stars</option>
+                    <option value="2">2 Stars</option>
+                    <option value="1">1 Star</option>
+                </select>
+                <input class="form-control" type="text" name="title" placeholder="Review title (optional)">
+            </div>
+            <textarea class="form-control" name="comment" rows="3" placeholder="Write your review..." style="margin-top:8px;" required></textarea>
+            <button class="btn btn-primary" type="submit" style="margin-top:8px;">Submit Review</button>
+            {% if current_user_review %}
+            <p style="margin-top:8px;color:var(--text-muted);">You already reviewed this product. Submitting again updates your review.</p>
+            {% endif %}
+        </form>
+        {% elif user_logged_in %}
+        <p style="color:var(--text-muted);">Buy this product to post a verified review.</p>
+        {% else %}
+        <p style="color:var(--text-muted);">Login to write a review.</p>
+        {% endif %}
+
+        {% if reviews %}
+        <div style="display:grid;gap:10px;">
+            {% for review in reviews %}
+            <article style="border:1px solid var(--border-color);border-radius:10px;padding:10px;background:var(--bg-color);">
+                <div style="display:flex;justify-content:space-between;gap:8px;">
+                    <strong>{{ review.user.name if review.user else 'User' }}</strong>
+                    <span>{{ "★" * review.rating }}{{ "☆" * (5 - review.rating) }}</span>
+                </div>
+                {% if review.title %}<h4 style="margin:6px 0 4px;">{{ review.title }}</h4>{% endif %}
+                <p style="margin:0;white-space:pre-wrap;">{{ review.comment }}</p>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--text-muted);">No reviews yet.</p>
+        {% endif %}
+    </section>
+</div>
+
+<style>
+    /* Plant Detail Specific Styles */
+    .plant-detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    .breadcrumb a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .breadcrumb a:hover {
+        color: var(--secondary-color);
+    }
+
+    .separator {
+        color: var(--text-muted);
+    }
+
+    .current {
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    .plant-detail-card {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        background: var(--surface-color);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+        margin-bottom: 3rem;
+    }
+
+    .plant-image-section {
+        position: relative;
+    }
+
+    .plant-image-container {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        margin-bottom: 1rem;
+    }
+
+    .plant-image {
+        width: 100%;
+        height: 500px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .plant-image:hover {
+        transform: scale(1.05);
+    }
+
+    .badge {
+        position: absolute;
+        top: 20px;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .offer-badge {
+        right: 20px;
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        animation: pulse 2s infinite;
+    }
+
+    .new-badge {
+        left: 20px;
+        background: linear-gradient(135deg, #4834d4, #686de0);
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .image-gallery {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .thumbnail.active {
+        border-color: var(--primary-color);
+        transform: scale(1.05);
+    }
+
+    .thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .plant-info-section {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .plant-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .plant-name {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .category-tag {
+        background: linear-gradient(135deg, var(--accent-color), var(--light-green));
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .price-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .current-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .original-price {
+        font-size: 1.5rem;
+        color: var(--text-muted);
+        text-decoration: line-through;
+    }
+
+    .discount-tag {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        animation: pulse 2s infinite;
+    }
+
+    .marketplace-meta {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        display: grid;
+        gap: 8px;
+    }
+
+    .meta-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .rating-chip {
+        background: #1f9d55;
+        color: #fff;
+        padding: 5px 11px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .meta-muted {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .assured-chip {
+        border: 1px solid rgba(46, 134, 222, 0.35);
+        background: rgba(52, 152, 219, 0.12);
+        color: #2e86de;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+
+    .stock-note {
+        color: #d35400;
+        font-weight: 700;
+    }
+
+    .stock-note.out {
+        color: var(--danger-color);
+    }
+
+    .promise-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 1.25rem;
+    }
+
+    .promise-item {
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 10px;
+        color: var(--text-muted);
+        font-size: 0.86rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .plant-description {
+        background: var(--bg-color);
+        padding: 2rem;
+        border-radius: 15px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .plant-description h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+
+    .description-content p {
+        margin-bottom: 1rem;
+        line-height: 1.8;
+    }
+
+    .care-tips {
+        background: var(--bg-color);
+        padding: 2rem;
+        border-radius: 15px;
+        border-left: 4px solid var(--accent-color);
+    }
+
+    .care-tips h3 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+    }
+
+    .care-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .care-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1rem;
+        background: var(--surface-color);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        transition: transform 0.3s ease;
+    }
+
+    .care-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .care-item i {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .care-item span {
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .care-item small {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .order-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .quantity-selector {
+        margin-bottom: 2rem;
+    }
+
+    .quantity-selector label {
+        display: block;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        width: fit-content;
+    }
+
+    .qty-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .qty-btn:hover {
+        background: var(--secondary-color);
+    }
+
+    #quantity {
+        border: none;
+        padding: 12px 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-align: center;
+        width: 80px;
+        background: #f8f9fa;
+        /* Light gray background instead of white */
+        color: #2c3e50;
+        /* Dark text color for contrast */
+        border-left: 1px solid #dee2e6;
+        border-right: 1px solid #dee2e6;
+    }
+
+    #quantity:focus {
+        outline: none;
+        background: #e9ecef;
+        /* Slightly darker when focused */
+        color: #1a252f;
+        /* Even darker text when focused */
+    }
+
+
+
+    .total-price {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .action-buttons .btn {
+        flex: 1;
+        background: white;
+        color: var(--primary-color);
+        border: 2px solid white;
+        font-weight: 600;
+        padding: 15px 25px;
+    }
+
+    .action-buttons .btn:hover {
+        background: transparent;
+        color: white;
+        border-color: white;
+        transform: translateY(-3px);
+    }
+
+    .info-tabs {
+        background: var(--surface-color);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .tab-headers {
+        display: flex;
+        background: var(--bg-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab-header {
+        flex: 1;
+        padding: 1.5rem 2rem;
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+    }
+
+    .tab-header.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+        background: var(--surface-color);
+    }
+
+    .tab-header:hover {
+        color: var(--primary-color);
+        background: var(--surface-color);
+    }
+
+    .tab-content {
+        padding: 3rem;
+    }
+
+    .tab-pane {
+        display: none;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    .tab-pane h4 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        font-size: 1.4rem;
+    }
+
+    .benefits-list {
+        list-style: none;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .benefits-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 1rem;
+        background: var(--bg-color);
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .benefits-list li:hover {
+        transform: translateX(10px);
+    }
+
+    .benefits-list i {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+
+    .placement-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+    }
+
+    .placement-item {
+        text-align: center;
+        padding: 2rem;
+        background: var(--bg-color);
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+    }
+
+    .placement-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .placement-item i {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .placement-item span {
+        display: block;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .placement-item small {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .troubleshooting-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .issue-item {
+        padding: 1.5rem;
+        background: var(--bg-color);
+        border-radius: 12px;
+        border-left: 4px solid var(--warning-color);
+    }
+
+    .issue-problem {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 0.5rem;
+    }
+
+    .issue-problem strong {
+        color: var(--text-color);
+    }
+
+    .issue-solution {
+        color: var(--text-muted);
+        margin-left: 2rem;
+        line-height: 1.6;
+    }
+
+    .recommendations {
+        margin-top: 2rem;
+    }
+
+    .recommendations h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .recommendation-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+    }
+
+    .recommendation-item {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 10px;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .recommendation-item:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+    }
+
+    .recommendation-item img {
+        width: 70px;
+        height: 70px;
+        border-radius: 8px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .recommendation-item h4 {
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+    }
+
+    .recommendation-item p {
+        margin: 0;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+    }
+
+    .recommendation-item .price {
+        margin-top: 4px;
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+
+    .text-warning {
+        color: var(--warning-color) !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .plant-detail-card {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .plant-name {
+            font-size: 2rem;
+        }
+
+        .plant-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .care-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .promise-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .tab-headers {
+            flex-direction: column;
+        }
+
+        .benefits-list {
+            grid-template-columns: 1fr;
+        }
+
+        .placement-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .recommendation-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .current-price {
+            font-size: 2rem;
+        }
+
+        .plant-image {
+            height: 300px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .plant-detail-container {
+            padding: 0 10px;
+        }
+
+        .breadcrumb {
+            font-size: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .order-section {
+            padding: 1.5rem;
+        }
+
+        .tab-content {
+            padding: 1.5rem;
+        }
+
+        .quantity-controls {
+            width: 100%;
+            justify-content: center;
+        }
+
+        #quantity {
+            width: 60px;
+        }
+    }
+
+    /* Animation for loading states */
+    .loading-skeleton {
+        background: linear-gradient(90deg, var(--bg-color) 25%, var(--border-color) 50%, var(--bg-color) 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+        0% {
+            background-position: 200% 0;
+        }
+
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    /* Accessibility improvements */
+    .btn:focus,
+    .tab-header:focus,
+    .qty-btn:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+
+    /* Print styles */
+    @media print {
+
+        .action-buttons,
+        .info-tabs,
+        .breadcrumb {
+            display: none;
+        }
+
+        .plant-detail-card {
+            grid-template-columns: 1fr;
+            box-shadow: none;
+            border: 1px solid #ccc;
+        }
+    }
+</style>
+
+<script>
+    // Global variables
+    let basePrice = Number('{{ selected_variant.price_value }}');
+    let currentQuantity = 1;
+    let selectedVariant = '{{ selected_variant.code }}';
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function () {
+        const qtyInput = document.getElementById('quantity');
+        const variantSelect = document.getElementById('variantSelect');
+        if (variantSelect) {
+            const selectedOption = variantSelect.options[variantSelect.selectedIndex];
+            const maxStock = Number(selectedOption.dataset.stock || 10);
+            if (qtyInput && maxStock > 0) {
+                qtyInput.max = String(Math.min(10, maxStock));
+            }
+        }
+        updateTotal();
+
+        // Add smooth transitions to all interactive elements
+        const interactiveElements = document.querySelectorAll('.btn, .tab-header, .thumbnail, .care-item');
+        interactiveElements.forEach(element => {
+            element.style.transition = 'all 0.3s ease';
+        });
+    });
+
+    // Image gallery functionality
+    function changeImage(imageSrc) {
+        const mainImage = document.getElementById('mainImage');
+        const thumbnails = document.querySelectorAll('.thumbnail');
+
+        // Update main image with fade effect
+        mainImage.style.opacity = '0.5';
+        setTimeout(() => {
+            mainImage.src = imageSrc;
+            mainImage.style.opacity = '1';
+        }, 150);
+
+        // Update active thumbnail
+        thumbnails.forEach(thumb => thumb.classList.remove('active'));
+        event.target.closest('.thumbnail').classList.add('active');
+    }
+
+    // Quantity control functions
+    function increaseQuantity() {
+        const quantityInput = document.getElementById('quantity');
+        const maxQuantity = parseInt(quantityInput.max);
+
+        if (currentQuantity < maxQuantity) {
+            currentQuantity++;
+            quantityInput.value = currentQuantity;
+            updateTotal();
+
+            // Add visual feedback
+            quantityInput.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                quantityInput.style.transform = 'scale(1)';
+            }, 200);
+        } else {
+            // Show max quantity reached feedback
+            showNotification('Maximum quantity reached!', 'warning');
+        }
+    }
+
+    function decreaseQuantity() {
+        const quantityInput = document.getElementById('quantity');
+
+        if (currentQuantity > 1) {
+            currentQuantity--;
+            quantityInput.value = currentQuantity;
+            updateTotal();
+
+            // Add visual feedback
+            quantityInput.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                quantityInput.style.transform = 'scale(1)';
+            }, 200);
+        } else {
+            showNotification('Minimum quantity is 1!', 'warning');
+        }
+    }
+
+    function updateTotal() {
+        const quantityInput = document.getElementById('quantity');
+        const totalPriceElement = document.getElementById('totalPrice');
+
+        currentQuantity = parseInt(quantityInput.value) || 1;
+        const totalPrice = basePrice * currentQuantity;
+
+        // Animate the price change
+        totalPriceElement.style.transform = 'scale(1.1)';
+        totalPriceElement.style.color = 'var(--success-color)';
+
+        setTimeout(() => {
+            totalPriceElement.textContent = `\u20b9${totalPrice.toLocaleString()}`;
+            totalPriceElement.style.transform = 'scale(1)';
+            totalPriceElement.style.color = '';
+        }, 200);
+    }
+
+    function updateVariant() {
+        const variantSelect = document.getElementById('variantSelect');
+        const selectedOption = variantSelect.options[variantSelect.selectedIndex];
+        selectedVariant = selectedOption.value;
+        basePrice = Number(selectedOption.dataset.price || basePrice);
+        const qtyInput = document.getElementById('quantity');
+        const maxStock = Number(selectedOption.dataset.stock || 10);
+        qtyInput.max = String(Math.max(1, Math.min(10, maxStock || 1)));
+        if (Number(qtyInput.value) > Number(qtyInput.max)) {
+            qtyInput.value = qtyInput.max;
+        }
+
+        const priceEl = document.getElementById('variantPrice');
+        const mrpEl = document.getElementById('variantMrp');
+        const discountEl = document.getElementById('variantDiscount');
+        priceEl.textContent = `₹${basePrice.toLocaleString()}`;
+        if (mrpEl) {
+            const mrp = Number(selectedOption.dataset.mrp || basePrice);
+            mrpEl.textContent = `₹${mrp.toLocaleString()}`;
+            mrpEl.style.display = mrp > basePrice ? 'inline' : 'none';
+        }
+        if (discountEl) {
+            const discount = Number(selectedOption.dataset.discount || 0);
+            discountEl.textContent = `${discount}% OFF`;
+            discountEl.style.display = discount > 0 ? 'inline-flex' : 'none';
+        }
+        updateTotal();
+    }
+
+    // Tab functionality
+    function showTab(tabName) {
+        const tabHeaders = document.querySelectorAll('.tab-header');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        // Remove active class from all tabs
+        tabHeaders.forEach(header => header.classList.remove('active'));
+        tabPanes.forEach(pane => {
+            pane.classList.remove('active');
+            pane.style.opacity = '0';
+        });
+
+        // Add active class to clicked tab
+        event.target.classList.add('active');
+        const targetPane = document.getElementById(tabName);
+
+        setTimeout(() => {
+            targetPane.classList.add('active');
+            targetPane.style.opacity = '1';
+        }, 150);
+    }
+
+    // Order functionality
+    function orderNow() {
+        {% if not user_logged_in %}
+        alert('Please login to continue with your purchase');
+        window.location.href = "{{ url_for('login') }}";
+        return;
+        {% endif %}
+
+        const quantity = Math.max(1, Math.min(10, currentQuantity));
+        window.location.href = "{{ url_for('deliveryinfo') }}?plant_id={{ plant_key }}&variant=" + encodeURIComponent(selectedVariant) + "&quantity=" + quantity;
+    }
+
+    function addToCart() {
+        {% if not user_logged_in %}
+        alert('Please login to add items to cart');
+        window.location.href = "{{ url_for('login') }}";
+        return;
+        {% endif %}
+
+        const quantity = Math.max(1, Math.min(10, currentQuantity));
+        const next = encodeURIComponent(window.location.pathname);
+        window.location.href = "{{ url_for('add_to_cart', plant_id=plant_key) }}" + `?variant=${encodeURIComponent(selectedVariant)}&quantity=${quantity}&next=${next}`;
+    }
+
+    function orderNowWithLoading() {
+        const orderBtn = document.querySelector('.order-btn');
+        orderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        orderBtn.disabled = true;
+
+        const quantity = Math.max(1, Math.min(10, currentQuantity));
+
+        setTimeout(() => {
+            window.location.href = "{{ url_for('deliveryinfo') }}?plant_id={{ plant_key }}&variant=" + encodeURIComponent(selectedVariant) + "&quantity=" + quantity;
+        }, 500);
+    }
+
+    // Wishlist functionality
+    async function addCurrentPlantToWishlist() {
+        const wishlistBtn = document.querySelector('.wishlist-btn');
+        const originalText = wishlistBtn.innerHTML;
+        const plantId = '{{ plant_key }}';
+        let added = false;
+        let existsInWishlist = false;
+
+        if (typeof window.addToWishlist === 'function') {
+            const result = await window.addToWishlist(plantId, { silent: true });
+            const items = Array.isArray(result?.items) ? result.items : [];
+            added = Boolean(result?.added);
+            existsInWishlist = items.includes(plantId);
+        }
+
+        if (!existsInWishlist) {
+            showNotification('Unable to add item to wishlist right now.', 'warning');
+            return;
+        }
+
+        if (!added) {
+            showNotification('Already in wishlist!', 'info');
+            return;
+        }
+
+        wishlistBtn.innerHTML = '<i class="fas fa-heart"></i> Added to Wishlist!';
+        wishlistBtn.style.background = 'var(--success-color)';
+        wishlistBtn.style.color = 'white';
+
+        showNotification('Added to wishlist successfully!', 'success');
+
+        setTimeout(() => {
+            wishlistBtn.innerHTML = originalText;
+            wishlistBtn.style.background = '';
+            wishlistBtn.style.color = '';
+        }, 2000);
+    }
+
+    // Notification system
+    function showNotification(message, type = 'info') {
+        // Remove existing notifications
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+        <i class="fas fa-${getNotificationIcon(type)}"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+        // Add styles
+        notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--surface-color);
+        color: var(--text-color);
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: var(--card-shadow);
+        border-left: 4px solid var(--${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'primary'}-color);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+        max-width: 300px;
+    `;
+
+        document.body.appendChild(notification);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 3000);
+    }
+
+    function getNotificationIcon(type) {
+        switch (type) {
+            case 'success': return 'check-circle';
+            case 'warning': return 'exclamation-triangle';
+            case 'error': return 'times-circle';
+            default: return 'info-circle';
+        }
+    }
+
+    // Add CSS animations for notifications
+    const notificationStyles = document.createElement('style');
+    notificationStyles.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    .notification-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0;
+        margin-left: auto;
+        font-size: 0.9rem;
+    }
+    
+    .notification-close:hover {
+        color: var(--text-color);
+    }
+`;
+    document.head.appendChild(notificationStyles);
+
+    // Keyboard navigation support
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowUp' && e.target.id === 'quantity') {
+            e.preventDefault();
+            increaseQuantity();
+        } else if (e.key === 'ArrowDown' && e.target.id === 'quantity') {
+            e.preventDefault();
+            decreaseQuantity();
+        }
+    });
+
+    // Image zoom functionality
+    document.getElementById('mainImage').addEventListener('click', function () {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        cursor: pointer;
+    `;
+
+        const img = document.createElement('img');
+        img.src = this.src;
+        img.style.cssText = `
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        border-radius: 10px;
+    `;
+
+        modal.appendChild(img);
+        document.body.appendChild(modal);
+
+        modal.addEventListener('click', function () {
+            document.body.removeChild(modal);
+        });
+    });
+
+    // Lazy loading for better performance
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.classList.remove('loading-skeleton');
+                    observer.unobserve(img);
+                }
+            });
+        });
+
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+</script>
+
+{% endblock %}
+
+

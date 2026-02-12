@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-page">
+    <h1 class="page-title">Admin Order Management</h1>
+    <p class="admin-subtitle">Track orders and update order/payment status.</p>
+
+    <div class="action-links">
+        <a class="btn btn-secondary" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_products') }}"><i class="fas fa-box-open"></i> Products</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_users') }}"><i class="fas fa-users"></i> Users</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_support') }}"><i class="fas fa-headset"></i> Support</a>
+    </div>
+
+    <section class="card">
+        <form method="GET" class="filters">
+            <div class="form-group">
+                <label for="search">Search</label>
+                <input id="search" name="search" class="form-control" value="{{ search_query }}" placeholder="Order id, customer, email, product">
+            </div>
+            <div class="form-group">
+                <label for="status">Order Status</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+                    {% for status in order_status_options %}
+                    <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>{{ order_status_labels.get(status, status) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="payment">Payment Status</label>
+                <select id="payment" name="payment" class="form-control">
+                    <option value="all" {% if payment_filter == 'all' %}selected{% endif %}>All</option>
+                    {% for status in payment_status_options %}
+                    <option value="{{ status }}" {% if payment_filter == status %}selected{% endif %}>{{ payment_status_labels.get(status, status) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Apply</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Amount</th>
+                        <th>Current Status</th>
+                        <th>Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <strong>#{{ order.id }}</strong>
+                            <div class="small-text">{{ order.order_date.strftime('%d %b %Y, %I:%M %p') }}</div>
+                        </td>
+                        <td>
+                            <div>{{ order.customer_name }}</div>
+                            <div class="small-text">{{ order.email }}</div>
+                            <div class="small-text">{{ order.phone_number }}</div>
+                        </td>
+                        <td>
+                            <div>{{ order.plant_name }}</div>
+                            <div class="small-text">Qty: {{ order.quantity }}</div>
+                        </td>
+                        <td>
+                            <div>{{ order.grand_total|inr }}</div>
+                            <div class="small-text">Method: {{ order.payment_method.replace('_', ' ')|title }}</div>
+                        </td>
+                        <td>
+                            <div>Order: <strong>{{ order.order_status.replace('_', ' ')|title }}</strong></div>
+                            <div>Payment: <strong>{{ order.payment_status.replace('_', ' ')|title }}</strong></div>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin_update_order', order_id=order.id) }}" class="inline-form">
+                                <input type="hidden" name="status_filter" value="{{ status_filter }}">
+                                <input type="hidden" name="payment_filter" value="{{ payment_filter }}">
+                                <input type="hidden" name="search_query" value="{{ search_query }}">
+                                <label>Order Status</label>
+                                <select class="form-control" name="order_status">
+                                    {% for status in order_status_options %}
+                                    <option value="{{ status }}" {% if order.order_status == status %}selected{% endif %}>{{ order_status_labels.get(status, status) }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label>Payment Status</label>
+                                <select class="form-control" name="payment_status">
+                                    {% for status in payment_status_options %}
+                                    <option value="{{ status }}" {% if order.payment_status == status %}selected{% endif %}>{{ payment_status_labels.get(status, status) }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button class="btn btn-primary" type="submit">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="empty-note">No orders found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<style>
+    .admin-page {
+        max-width: 1220px;
+        margin: 0 auto;
+    }
+
+    .admin-subtitle {
+        text-align: center;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+    }
+
+    .action-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 14px;
+    }
+
+    .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: end;
+    }
+
+    .filters .form-group {
+        margin: 0;
+        min-width: 220px;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px 8px;
+        vertical-align: top;
+        text-align: left;
+        font-size: 0.88rem;
+    }
+
+    th {
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .small-text {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .inline-form {
+        display: grid;
+        gap: 6px;
+        min-width: 220px;
+    }
+
+    .inline-form label {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+    }
+
+    .inline-form .btn {
+        margin-top: 4px;
+        padding: 10px;
+    }
+
+    .empty-note {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 20px;
+    }
+</style>
+{% endblock %}

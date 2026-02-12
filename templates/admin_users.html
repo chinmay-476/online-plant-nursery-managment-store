@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-page">
+    <h1 class="page-title">Admin User Management</h1>
+    <p class="admin-subtitle">Monitor registered users and their purchase activity.</p>
+
+    <div class="action-links">
+        <a class="btn btn-secondary" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_products') }}"><i class="fas fa-box-open"></i> Products</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_orders') }}"><i class="fas fa-receipt"></i> Orders</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_support') }}"><i class="fas fa-headset"></i> Support</a>
+    </div>
+
+    <section class="card">
+        <form method="GET" class="filters">
+            <div class="form-group">
+                <label for="search">Search User</label>
+                <input id="search" name="search" class="form-control" value="{{ search_query }}" placeholder="Name, email, phone, id">
+            </div>
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select id="role" name="role" class="form-control">
+                    <option value="all" {% if role_filter == 'all' %}selected{% endif %}>All Roles</option>
+                    {% for role_key, role_label in role_labels.items() %}
+                    <option value="{{ role_key }}" {% if role_filter == role_key %}selected{% endif %}>{{ role_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Joined</th>
+                        <th>Role</th>
+                        <th>Loyalty</th>
+                        <th>Referral</th>
+                        <th>Orders</th>
+                        <th>Total Spend</th>
+                        <th>Update Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    {% set stats = order_stats.get(user.id, {'order_count': 0, 'spend_total': 0}) %}
+                    <tr>
+                        <td>#{{ user.id }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.phone_number }}</td>
+                        <td>{{ user.created_at.strftime('%d %b %Y') if user.created_at else '-' }}</td>
+                        <td>{{ role_labels.get(user.role, user.role|title) }}</td>
+                        <td>{{ user.loyalty_points or 0 }}</td>
+                        <td>{{ user.referral_code or '-' }}</td>
+                        <td>{{ stats.order_count }}</td>
+                        <td>{{ stats.spend_total|inr }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin_update_user_role', user_id=user.id) }}" style="display:flex;gap:6px;">
+                                <input type="hidden" name="search_query" value="{{ search_query }}">
+                                <input type="hidden" name="role_filter" value="{{ role_filter }}">
+                                <select name="role" class="form-control">
+                                    {% for role_key, role_label in role_labels.items() %}
+                                    <option value="{{ role_key }}" {% if user.role == role_key %}selected{% endif %}>{{ role_label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button class="btn btn-secondary" type="submit">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="11" class="empty-note">No users found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<style>
+    .admin-page {
+        max-width: 1120px;
+        margin: 0 auto;
+    }
+
+    .admin-subtitle {
+        text-align: center;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+    }
+
+    .action-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 14px;
+    }
+
+    .filters {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: end;
+    }
+
+    .filters .form-group {
+        margin: 0;
+        min-width: 220px;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px 8px;
+        text-align: left;
+        font-size: 0.9rem;
+    }
+
+    th {
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .empty-note {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 20px;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-page">
+    <h1 class="page-title">Review Moderation</h1>
+    <section class="card" style="margin-bottom:12px;">
+        <form method="GET" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input class="form-control" type="text" name="search" value="{{ search_query }}" placeholder="Search reviews or users">
+            <select class="form-control" name="status">
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+            </select>
+            <button class="btn btn-primary" type="submit">Filter</button>
+        </form>
+    </section>
+
+    <section class="card">
+        {% if reviews %}
+        <div style="display:grid;gap:10px;">
+            {% for review in reviews %}
+            <article style="border:1px solid var(--border-color);border-radius:10px;padding:10px;background:var(--bg-color);">
+                <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+                    <strong>{{ review.user.name if review.user else 'User' }} - {{ review.plant_id }}</strong>
+                    <span>{{ "★" * review.rating }}{{ "☆" * (5 - review.rating) }}</span>
+                </div>
+                {% if review.title %}<h3 style="margin:6px 0;">{{ review.title }}</h3>{% endif %}
+                <p style="margin:0 0 8px;">{{ review.comment }}</p>
+                <form method="POST" action="{{ url_for('admin_update_review_status', review_id=review.id) }}" style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <input type="hidden" name="status_filter" value="{{ status_filter }}">
+                    <input type="hidden" name="search_query" value="{{ search_query }}">
+                    <button class="btn btn-primary" type="submit" name="action" value="approve">Approve</button>
+                    <button class="btn btn-secondary" type="submit" name="action" value="reject">Reject</button>
+                </form>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-note">No reviews found.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

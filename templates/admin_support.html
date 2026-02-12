@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-support-page">
+    <h1 class="page-title">Admin Support Desk</h1>
+    <p class="admin-subtitle">Manage customer complaints, assign agents, and respond in ticket threads.</p>
+
+    <section class="card filter-card">
+        <form method="GET" class="filter-form">
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select name="status" id="status" class="form-control">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+                    {% for status_key, status_name in status_labels.items() %}
+                    <option value="{{ status_key }}" {% if status_filter == status_key %}selected{% endif %}>{{ status_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select name="priority" id="priority" class="form-control">
+                    <option value="all" {% if priority_filter == 'all' %}selected{% endif %}>All</option>
+                    {% for priority_key, priority_name in priority_labels.items() %}
+                    <option value="{{ priority_key }}" {% if priority_filter == priority_key %}selected{% endif %}>{{ priority_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </form>
+    </section>
+
+    <section class="card ticket-list-card">
+        {% if tickets %}
+        <div class="ticket-list">
+            {% for ticket in tickets %}
+            <article class="ticket-item">
+                <div class="ticket-head">
+                    <div>
+                        <h3>{{ ticket.subject }}</h3>
+                        <p>{{ ticket.reference_code }} • {{ ticket.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+                        <p>Customer: {{ ticket.user.name if ticket.user else 'Unknown' }} ({{ ticket.user.email if ticket.user else '-' }})</p>
+                    </div>
+                    <div class="ticket-badges">
+                        <span class="badge status {{ ticket.status }}">{{ status_labels.get(ticket.status, ticket.status|title) }}</span>
+                        <span class="badge priority {{ ticket.priority }}">{{ priority_labels.get(ticket.priority, ticket.priority|title) }}</span>
+                        <span class="badge category">{{ category_labels.get(ticket.category, ticket.category|title) }}</span>
+                    </div>
+                </div>
+
+                <p class="ticket-desc">{{ ticket.description }}</p>
+                <p class="agent-line">
+                    <i class="fas fa-user-tie"></i>
+                    Assigned: {{ ticket.assigned_agent or 'Unassigned' }}
+                </p>
+                <p class="agent-line">
+                    <i class="fas fa-hourglass-half"></i>
+                    SLA Due: {{ ticket.due_at.strftime('%d %b %Y, %I:%M %p') if ticket.due_at else 'Not set' }}
+                    {% if ticket.escalated %}
+                    <span class="badge priority urgent" style="margin-left:6px;">Escalated L{{ ticket.escalation_level }}</span>
+                    {% endif %}
+                </p>
+
+                <div class="admin-actions">
+                    <form method="POST" action="{{ url_for('admin_assign_support_ticket', ticket_id=ticket.id) }}">
+                        <button type="submit" class="btn btn-secondary">Assign to Me</button>
+                    </form>
+
+                    <form method="POST" action="{{ url_for('admin_update_support_ticket_status', ticket_id=ticket.id) }}" class="status-form">
+                        <select name="status" class="form-control">
+                            {% for status_key, status_name in status_labels.items() %}
+                            <option value="{{ status_key }}" {% if ticket.status == status_key %}selected{% endif %}>{{ status_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-secondary">Update Status</button>
+                    </form>
+                </div>
+
+                <div class="thread-box">
+                    <h4>Conversation</h4>
+                    {% if ticket.messages %}
+                    <div class="thread-list">
+                        {% for msg in ticket.messages %}
+                        <div class="thread-msg {{ msg.sender_role }}">
+                            <div class="thread-meta">
+                                <strong>{{ msg.sender_name or msg.sender_role|title }}</strong>
+                                <span>{{ msg.created_at.strftime('%d %b, %I:%M %p') }}</span>
+                            </div>
+                            <p>{{ msg.message }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="empty-note">No messages yet.</p>
+                    {% endif %}
+                </div>
+
+                {% if ticket.status != 'closed' %}
+                <form method="POST" action="{{ url_for('admin_reply_support_ticket', ticket_id=ticket.id) }}" class="reply-form">
+                    {{ message_form.hidden_tag() }}
+                    <select class="form-control canned-response" data-target="agent-message-{{ ticket.id }}" style="margin-bottom:8px;">
+                        <option value="">Insert canned response</option>
+                        {% for canned in canned_responses %}
+                        <option value="{{ canned }}">{{ canned }}</option>
+                        {% endfor %}
+                    </select>
+                    {{ message_form.message(class="form-control", id="agent-message-" ~ ticket.id, rows="3", placeholder="Reply to customer...") }}
+                    {{ message_form.submit(class="btn btn-primary") }}
+                </form>
+                {% else %}
+                <p class="closed-note"><i class="fas fa-lock"></i> Ticket is closed.</p>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-note">No tickets found for the selected filters.</p>
+        {% endif %}
+    </section>
+</div>
+
+<style>
+    .admin-support-page {
+        max-width: 1120px;
+        margin: 0 auto;
+    }
+
+    .admin-subtitle {
+        text-align: center;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 10px;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+
+    .filter-form .form-group {
+        margin: 0;
+        min-width: 200px;
+    }
+
+    .ticket-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .ticket-item {
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        background: var(--bg-color);
+        padding: 14px;
+    }
+
+    .ticket-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .ticket-head h3 {
+        margin: 0 0 2px;
+        font-size: 1.05rem;
+    }
+
+    .ticket-head p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .ticket-badges {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid var(--border-color);
+        background: var(--surface-color);
+    }
+
+    .badge.status.open {
+        background: rgba(23, 162, 184, 0.12);
+        border-color: rgba(23, 162, 184, 0.32);
+    }
+
+    .badge.status.awaiting_agent {
+        background: rgba(255, 193, 7, 0.14);
+        border-color: rgba(255, 193, 7, 0.33);
+    }
+
+    .badge.status.in_progress {
+        background: rgba(52, 58, 64, 0.12);
+        border-color: rgba(52, 58, 64, 0.28);
+    }
+
+    .badge.status.resolved {
+        background: rgba(40, 167, 69, 0.12);
+        border-color: rgba(40, 167, 69, 0.3);
+    }
+
+    .badge.status.closed {
+        background: rgba(108, 117, 125, 0.14);
+    }
+
+    .badge.priority.urgent,
+    .badge.priority.high {
+        background: rgba(220, 53, 69, 0.12);
+        border-color: rgba(220, 53, 69, 0.3);
+    }
+
+    .badge.priority.medium {
+        background: rgba(255, 193, 7, 0.14);
+        border-color: rgba(255, 193, 7, 0.33);
+    }
+
+    .badge.priority.low {
+        background: rgba(40, 167, 69, 0.12);
+        border-color: rgba(40, 167, 69, 0.3);
+    }
+
+    .ticket-desc {
+        margin: 10px 0;
+        color: var(--text-color);
+        white-space: pre-wrap;
+    }
+
+    .agent-line {
+        margin: 4px 0 10px;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .admin-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+    }
+
+    .status-form {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .status-form .form-control {
+        min-width: 170px;
+    }
+
+    .thread-box {
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 10px;
+        background: var(--surface-color);
+    }
+
+    .thread-box h4 {
+        margin: 0 0 8px;
+        font-size: 0.95rem;
+    }
+
+    .thread-list {
+        display: grid;
+        gap: 8px;
+        max-height: 260px;
+        overflow-y: auto;
+    }
+
+    .thread-msg {
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 8px 10px;
+        background: var(--bg-color);
+    }
+
+    .thread-msg.agent {
+        border-color: rgba(45, 90, 39, 0.35);
+        background: rgba(127, 188, 140, 0.12);
+    }
+
+    .thread-msg.system {
+        border-color: rgba(108, 117, 125, 0.35);
+        background: rgba(108, 117, 125, 0.1);
+    }
+
+    .thread-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+    }
+
+    .thread-msg p {
+        margin: 0;
+        white-space: pre-wrap;
+    }
+
+    .reply-form {
+        margin-top: 10px;
+    }
+
+    .reply-form .btn {
+        margin-top: 8px;
+    }
+
+    .empty-note,
+    .closed-note {
+        color: var(--text-muted);
+    }
+
+    @media (max-width: 720px) {
+        .status-form {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".canned-response").forEach((dropdown) => {
+        dropdown.addEventListener("change", function () {
+            if (!this.value) return;
+            const target = document.getElementById(this.dataset.target);
+            if (!target) return;
+            target.value = this.value;
+            target.focus();
+        });
+    });
+});
+</script>
+{% endblock %}

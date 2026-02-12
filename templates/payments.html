@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="payment-container">
+    <h1 class="page-title">Complete Your Payment</h1>
+
+    <div class="payment-grid">
+        <section class="card order-card">
+            <h2>Order Summary</h2>
+            <div class="order-item">
+                <img src="{{ url_for('static', filename='images/' + order.plant_image) }}" alt="{{ order.plant_name }}">
+                <div>
+                    <h3>{{ order.plant_name }}</h3>
+                    <p>{{ order.quantity }} x {{ order.unit_price|inr }}</p>
+                </div>
+            </div>
+
+            <div class="price-row">
+                <span>Subtotal</span>
+                <span>{{ order.total_price|inr }}</span>
+            </div>
+            {% if order.coupon_discount and order.coupon_discount > 0 %}
+            <div class="price-row discount">
+                <span>Coupon Discount{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</span>
+                <span>-{{ order.coupon_discount|inr }}</span>
+            </div>
+            {% endif %}
+            <div class="price-row">
+                <span>Delivery</span>
+                <span>
+                    {% if order.delivery_fee == 0 %}
+                        FREE
+                    {% else %}
+                        {{ order.delivery_fee|inr }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="price-row total">
+                <span>Total</span>
+                <span>{{ order.grand_total|inr }}</span>
+            </div>
+        </section>
+
+        <section class="card payment-card">
+            <h2>Choose Payment Method</h2>
+
+            <form method="POST" id="paymentForm">
+                {{ form.hidden_tag() }}
+                {{ form.payment_method(id="payment_method", value="cod") }}
+                {{ form.upi_id(id="hidden_upi_id") }}
+                {{ form.bank_name(id="hidden_bank_name") }}
+
+                <div class="method-list">
+                    <label class="method-option active" data-method="cod">
+                        <input type="radio" name="method_ui" value="cod" checked>
+                        <span>Cash on Delivery</span>
+                    </label>
+
+                    <label class="method-option" data-method="upi">
+                        <input type="radio" name="method_ui" value="upi">
+                        <span>UPI Payment</span>
+                    </label>
+                    <div class="method-input" id="upiInput" style="display: none;">
+                        <input type="text" id="upi_id_display" placeholder="yourname@upi">
+                    </div>
+
+                    <label class="method-option" data-method="netbanking">
+                        <input type="radio" name="method_ui" value="netbanking">
+                        <span>Net Banking</span>
+                    </label>
+                    <div class="method-input" id="bankInput" style="display: none;">
+                        <select id="bank_name_display">
+                            <option value="">Select bank</option>
+                            <option value="sbi">State Bank of India</option>
+                            <option value="hdfc">HDFC Bank</option>
+                            <option value="icici">ICICI Bank</option>
+                            <option value="axis">Axis Bank</option>
+                            <option value="pnb">Punjab National Bank</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary full-width">Proceed</button>
+            </form>
+        </section>
+    </div>
+</div>
+
+<style>
+    .payment-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .payment-grid {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    .order-card h2,
+    .payment-card h2 {
+        margin-bottom: 18px;
+    }
+
+    .order-item {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .order-item img {
+        width: 88px;
+        height: 88px;
+        border-radius: 10px;
+        object-fit: cover;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+        color: var(--text-muted);
+    }
+
+    .price-row.total {
+        border-top: 1px solid var(--border-color);
+        padding-top: 10px;
+        color: var(--text-color);
+        font-weight: 700;
+    }
+
+    .price-row.discount {
+        color: var(--success-color);
+        font-weight: 600;
+    }
+
+    .method-list {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .method-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 12px 14px;
+        cursor: pointer;
+    }
+
+    .method-option.active {
+        border-color: var(--primary-color);
+        background: var(--bg-color);
+    }
+
+    .method-input input,
+    .method-input select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--surface-color);
+        color: var(--text-color);
+    }
+
+    .full-width {
+        width: 100%;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const methodInputs = document.querySelectorAll('input[name="method_ui"]');
+        const methodHidden = document.getElementById("payment_method");
+        const upiInput = document.getElementById("upiInput");
+        const bankInput = document.getElementById("bankInput");
+        const upiDisplay = document.getElementById("upi_id_display");
+        const bankDisplay = document.getElementById("bank_name_display");
+        const hiddenUpi = document.getElementById("hidden_upi_id");
+        const hiddenBank = document.getElementById("hidden_bank_name");
+        const form = document.getElementById("paymentForm");
+
+        function setActive(method) {
+            document.querySelectorAll(".method-option").forEach((el) => {
+                el.classList.toggle("active", el.dataset.method === method);
+            });
+            upiInput.style.display = method === "upi" ? "block" : "none";
+            bankInput.style.display = method === "netbanking" ? "block" : "none";
+            methodHidden.value = method;
+        }
+
+        methodInputs.forEach((input) => {
+            input.addEventListener("change", function () {
+                setActive(this.value);
+            });
+        });
+
+        form.addEventListener("submit", function () {
+            hiddenUpi.value = upiDisplay.value.trim();
+            hiddenBank.value = bankDisplay.value.trim();
+        });
+
+        setActive("cod");
+    });
+</script>
+{% endblock %}

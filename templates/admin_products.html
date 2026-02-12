@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-page">
+    <h1 class="page-title">Admin Product Management</h1>
+    <p class="admin-subtitle">Update price, inventory, listing status, and promotional flags.</p>
+
+    <div class="action-links">
+        <a class="btn btn-secondary" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_orders') }}"><i class="fas fa-receipt"></i> Orders</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_users') }}"><i class="fas fa-users"></i> Users</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_support') }}"><i class="fas fa-headset"></i> Support</a>
+    </div>
+
+    <section class="card">
+        <form method="GET" class="filters">
+            <div class="form-group">
+                <label for="search">Search</label>
+                <input id="search" name="search" class="form-control" value="{{ search_query }}" placeholder="Name, id, category">
+            </div>
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category" class="form-control">
+                    <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All</option>
+                    {% for category in category_filters %}
+                    <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="active">Listing</label>
+                <select id="active" name="active" class="form-control">
+                    <option value="all" {% if active_filter == 'all' %}selected{% endif %}>All</option>
+                    <option value="active" {% if active_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if active_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Apply</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Current</th>
+                        <th>Overrides</th>
+                        <th>Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr class="{{ '' if item.active else 'row-inactive' }}">
+                        <td>
+                            <strong>{{ item.name }}</strong>
+                            <div class="small-text">{{ item.id }}</div>
+                        </td>
+                        <td>
+                            <i class="{{ category_icons.get(item.category, 'fas fa-seedling') }}"></i>
+                            {{ item.category }}
+                        </td>
+                        <td>
+                            <div>Price: {{ item.price_value|inr }}</div>
+                            <div>Stock: {{ item.stock }}</div>
+                            <div>Offer: {{ 'Yes' if item.offer else 'No' }}</div>
+                            <div>New: {{ 'Yes' if item.new else 'No' }}</div>
+                            <div>Active: {{ 'Yes' if item.active else 'No' }}</div>
+                        </td>
+                        <td>
+                            <div>Price: {{ item.override_price if item.override_price is not none else 'Default' }}</div>
+                            <div>Stock: {{ item.override_stock if item.override_stock is not none else 'Default' }}</div>
+                            <div>Offer: {% if item.override_offer is none %}Default{% else %}{{ 'Force On' if item.override_offer else 'Force Off' }}{% endif %}</div>
+                            <div>New: {% if item.override_new is none %}Default{% else %}{{ 'Force On' if item.override_new else 'Force Off' }}{% endif %}</div>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin_update_product', plant_id=item.id) }}" class="inline-form">
+                                <input type="hidden" name="next" value="{{ request.full_path if request.query_string else request.path }}">
+                                <label>Price</label>
+                                <input class="form-control" type="number" min="1" max="100000" name="price_override" value="{{ item.override_price if item.override_price is not none else '' }}" placeholder="Default">
+                                <label>Stock</label>
+                                <input class="form-control" type="number" min="0" max="5000" name="stock_override" value="{{ item.override_stock if item.override_stock is not none else '' }}" placeholder="Default">
+                                <label>Offer</label>
+                                <select class="form-control" name="offer_override">
+                                    <option value="default" {% if item.override_offer is none %}selected{% endif %}>Default</option>
+                                    <option value="true" {% if item.override_offer is sameas true %}selected{% endif %}>Force On</option>
+                                    <option value="false" {% if item.override_offer is sameas false %}selected{% endif %}>Force Off</option>
+                                </select>
+                                <label>New Badge</label>
+                                <select class="form-control" name="new_override">
+                                    <option value="default" {% if item.override_new is none %}selected{% endif %}>Default</option>
+                                    <option value="true" {% if item.override_new is sameas true %}selected{% endif %}>Force On</option>
+                                    <option value="false" {% if item.override_new is sameas false %}selected{% endif %}>Force Off</option>
+                                </select>
+                                <label>Listing</label>
+                                <select class="form-control" name="is_active">
+                                    <option value="true" {% if item.active %}selected{% endif %}>Active</option>
+                                    <option value="false" {% if not item.active %}selected{% endif %}>Inactive</option>
+                                </select>
+                                <button class="btn btn-primary" type="submit">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="empty-note">No products match current filters.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<style>
+    .admin-page {
+        max-width: 1220px;
+        margin: 0 auto;
+    }
+
+    .admin-subtitle {
+        text-align: center;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+    }
+
+    .action-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 14px;
+    }
+
+    .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: end;
+    }
+
+    .filters .form-group {
+        margin: 0;
+        min-width: 200px;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px 8px;
+        vertical-align: top;
+        text-align: left;
+        font-size: 0.88rem;
+    }
+
+    th {
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .small-text {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .inline-form {
+        display: grid;
+        gap: 6px;
+        min-width: 220px;
+    }
+
+    .inline-form label {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+    }
+
+    .inline-form .btn {
+        margin-top: 4px;
+        padding: 10px;
+    }
+
+    .row-inactive {
+        background: rgba(108, 117, 125, 0.08);
+    }
+
+    .empty-note {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 20px;
+    }
+</style>
+{% endblock %}

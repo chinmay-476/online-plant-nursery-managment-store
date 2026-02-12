@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="history-page">
+    <h1 class="page-title">Track Order #{{ order.id }}</h1>
+    <section class="card">
+        <p><strong>Product:</strong> {{ order.plant_name }}</p>
+        <p><strong>Tracking Code:</strong> {{ order.tracking_code or 'Pending' }}</p>
+        <p><strong>Estimated Delivery:</strong>
+            {% if order.estimated_delivery_date %}
+                {{ order.estimated_delivery_date.strftime('%d %b %Y') }}
+            {% else %}
+                TBD
+            {% endif %}
+        </p>
+
+        {% if exceptional_status %}
+        <p style="color:var(--warning-color);font-weight:700;">Current Status: {{ exceptional_status }}</p>
+        {% endif %}
+
+        <div style="display:grid;gap:10px;margin-top:12px;">
+            {% for step in timeline %}
+            <div style="border:1px solid var(--border-color);border-radius:10px;padding:10px;background:{% if step.active %}rgba(40,167,69,0.15){% elif step.done %}rgba(40,167,69,0.08){% else %}var(--bg-color){% endif %};">
+                <strong>{{ loop.index }}. {{ step.label }}</strong>
+                {% if step.active %}<span> (Current)</span>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

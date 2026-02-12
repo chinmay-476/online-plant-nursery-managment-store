@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Flora Botanical Nursery</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2d5a27; /* Deep forest green */
+            --secondary-color: #4a7c59; /* Medium forest green */
+            --accent-color: #7fbc8c; /* Sage green */
+            --light-green: #a8d5ba; /* Light mint */
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            
+            --bg-color: #f8fdf8; /* Very light green */
+            --bg-pattern: radial-gradient(circle at 20% 80%, rgba(45, 90, 39, 0.05) 0%, transparent 50%),
+                         radial-gradient(circle at 80% 20%, rgba(127, 188, 140, 0.05) 0%, transparent 50%);
+            --surface-color: #ffffff;
+            --text-color: #2c3e2d;
+            --text-muted: #6b7c6b;
+            --border-color: #d4e7d4;
+            --shadow: 0 4px 20px rgba(45, 90, 39, 0.1);
+            --card-shadow: 0 8px 32px rgba(127, 188, 140, 0.15);
+            --header-gradient: linear-gradient(135deg, #2d5a27 0%, #4a7c59 50%, #7fbc8c 100%);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0d1a0d;
+            --bg-pattern: radial-gradient(circle at 20% 80%, rgba(127, 188, 140, 0.1) 0%, transparent 50%),
+                         radial-gradient(circle at 80% 20%, rgba(45, 90, 39, 0.1) 0%, transparent 50%);
+            --surface-color: #1a2e1a;
+            --text-color: #e8f5e8;
+            --text-muted: #a8d5ba;
+            --border-color: #2d5a27;
+            --shadow: 0 4px 20px rgba(0,0,0,0.5);
+            --card-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            --header-gradient: linear-gradient(135deg, #1a2e1a 0%, #2d5a27 50%, #4a7c59 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            background-image: var(--bg-pattern);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Decorative Elements */
+        .leaf-decoration {
+            position: absolute;
+            opacity: 0.1;
+            pointer-events: none;
+            font-size: 2rem;
+            color: var(--primary-color);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .leaf-decoration:nth-child(odd) {
+            animation-delay: -3s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        /* Header Styles */
+        header {
+            background: var(--header-gradient);
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M20 20c0-5 5-10 10-10s10 5 10 10-5 10-10 10-10-5-10-10z" fill="white" opacity="0.05"/><path d="M60 70c0-3 3-6 6-6s6 3 6 6-3 6-6 6-6-3-6-6z" fill="white" opacity="0.03"/></svg>') repeat;
+            opacity: 0.1;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+        }
+
+        .logo i {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #a8d5ba, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: leafGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes leafGlow {
+            0% { filter: drop-shadow(0 0 5px rgba(168, 213, 186, 0.5)); }
+            100% { filter: drop-shadow(0 0 15px rgba(168, 213, 186, 0.8)); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-links a:hover::before {
+            left: 100%;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .theme-toggle {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.3rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 3rem 0;
+            position: relative;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '🌿';
+            position: absolute;
+            right: -60px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            animation: sway 2s ease-in-out infinite;
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: translateY(-50%) rotate(-5deg); }
+            50% { transform: translateY(-50%) rotate(5deg); }
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--surface-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--light-green));
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(45, 90, 39, 0.2);
+            border-color: var(--accent-color);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.7rem;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 1.1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(45, 90, 39, 0.1);
+            transform: scale(1.02);
+            background: var(--surface-color);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 35px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: 0 4px 15px rgba(45, 90, 39, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(45, 90, 39, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .btn-secondary {
+            background: var(--surface-color);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            font-weight: 500;
+            position: relative;
+            border-left: 5px solid;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(168, 213, 186, 0.1));
+            color: var(--success-color);
+            border-left-color: var(--success-color);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(255, 193, 193, 0.1));
+            color: var(--danger-color);
+            border-left-color: var(--danger-color);
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 235, 193, 0.1));
+            color: var(--warning-color);
+            border-left-color: var(--warning-color);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(193, 235, 255, 0.1));
+            color: #17a2b8;
+            border-left-color: #17a2b8;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--header-gradient);
+            color: white;
+            text-align: center;
+            padding: 3rem 0 2rem;
+            margin-top: auto;
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .footer-brand {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            border-bottom-color: var(--light-green);
+            transform: translateY(-2px);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .social-links a {
+            color: rgba(255,255,255,0.8);
+            font-size: 1.8rem;
+            transition: all 0.3s ease;
+            padding: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .social-links a:hover {
+            color: white;
+            transform: translateY(-5px) scale(1.1);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 25px;
+            }
+
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .page-title::after {
+                display: none;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .logo i {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Plant-themed decorations */
+        .plant-decoration {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 3rem;
+            opacity: 0.1;
+            pointer-events: none;
+            animation: grow 4s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes grow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="leaf-decoration" style="top: 10%; left: 5%;">🌿</div>
+    <div class="leaf-decoration" style="top: 20%; right: 10%;">🍃</div>
+    <div class="leaf-decoration" style="bottom: 30%; left: 8%;">🌱</div>
+    <div class="plant-decoration">🌿</div>
+
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="{{ url_for('home') }}" class="logo">
+                    <i class="fas fa-seedling"></i>
+                    Flora Botanical
+                </a>
+                <nav class="nav-links">
+                    <a href="{{ url_for('home') }}"><i class="fas fa-home"></i> Home</a>
+                    <a href="{{ url_for('showproduct') }}"><i class="fas fa-leaf"></i> Plants</a>
+                    <a href="{{ url_for('support_center') }}"><i class="fas fa-headset"></i> Support</a>
+                    {% if is_admin_user %}
+                        <a href="{{ url_for('admin_dashboard') }}" style="background: rgba(255,255,255,0.2);">
+                            <i class="fas fa-user-shield"></i> {{ session.get('admin_name', 'Admin') }}
+                        </a>
+                        <a href="{{ url_for('admin_products') }}" class="nav-link">
+                            <i class="fas fa-box-open"></i> Products
+                        </a>
+                        <a href="{{ url_for('admin_orders') }}" class="nav-link">
+                            <i class="fas fa-receipt"></i> Orders
+                        </a>
+                        <a href="{{ url_for('admin_users') }}" class="nav-link">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                        <a href="{{ url_for('admin_support') }}" class="nav-link">
+                            <i class="fas fa-life-ring"></i> Support Desk
+                        </a>
+                        <a href="{{ url_for('admin_reviews') }}" class="nav-link">
+                            <i class="fas fa-star"></i> Reviews
+                        </a>
+                        <a href="{{ url_for('admin_returns') }}" class="nav-link">
+                            <i class="fas fa-undo"></i> Returns
+                        </a>
+                        <a href="{{ url_for('admin_logout') }}" style="background: rgba(220, 53, 69, 0.3);">
+                            <i class="fas fa-sign-out-alt"></i> Admin Logout
+                        </a>
+                    {% elif session.get('user_id') %}
+                        <a href="{{ url_for('showproduct') }}" style="background: rgba(255,255,255,0.2);">
+                            <i class="fas fa-user"></i> {{ session.get('user_name', 'User') }}
+                        </a>
+                        <a href="{{ url_for('cart') }}" class="nav-link">
+                            <i class="fas fa-shopping-cart"></i> Cart
+                        </a>
+                        <a href="{{ url_for('order_history') }}" class="nav-link">
+                            <i class="fas fa-box"></i> Orders
+                        </a>
+                        <a href="{{ url_for('wishlist') }}" class="nav-link">
+                            <i class="fas fa-heart"></i> Wishlist
+                            <span class="wishlist-count" id="wishlistCount">0</span>
+                        </a>
+                        <a href="{{ url_for('logout') }}" style="background: rgba(220, 53, 69, 0.3);">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                        <a href="{{ url_for('admin_login') }}" class="nav-link">
+                            <i class="fas fa-user-shield"></i> Admin Portal
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Login</a>
+                        <a href="{{ url_for('signup') }}"><i class="fas fa-user-plus"></i> Sign Up</a>
+                        <a href="{{ url_for('wishlist') }}" class="nav-link">
+                            <i class="fas fa-heart"></i> Wishlist
+                            <span class="wishlist-count" id="wishlistCount">0</span>
+                        </a>
+                        <a href="{{ url_for('admin_login') }}" class="nav-link">
+                            <i class="fas fa-user-shield"></i> Admin
+                        </a>
+                    {% endif %}
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'message' else 'success' }}">
+                            {% if category == 'success' or category == 'message' %}
+                                <i class="fas fa-check-circle"></i>
+                            {% elif category == 'danger' or category == 'error' %}
+                                <i class="fas fa-exclamation-circle"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fas fa-exclamation-triangle"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle"></i>
+                            {% endif %}
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <i class="fas fa-seedling"></i> Flora Botanical Nursery
+                    <p style="font-family: 'Poppins', sans-serif; font-size: 0.9rem; margin-top: 5px; opacity: 0.8;">&copy; 2026 Flora Botanical. Growing dreams, nurturing nature.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="/about">About Us</a>
+                    <a href="/faqs">FAQ'S</a>
+                    <a href="/contact">Contact Us</a>
+                    <a href="{{ url_for('support_center') }}">Support Center</a>
+                    <a href="/plantcaredetails">Plant Care</a>
+                    <a href="{{ url_for('developer_documentation') }}">Developer Docs</a>
+                </div>
+                <div class="social-links">
+                    <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle Functionality
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeIcon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+            }
+
+            // Add floating animation to decorative elements
+            const decorations = document.querySelectorAll('.leaf-decoration');
+            decorations.forEach((decoration, index) => {
+                decoration.style.animationDelay = `${index * 0.5}s`;
+            });
+        });
+
+        // Form validation enhancement
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const submitBtn = form.querySelector('input[type="submit"], button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+                        submitBtn.disabled = true;
+                    }
+                });
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Add subtle parallax effect to decorative elements
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const decorations = document.querySelectorAll('.leaf-decoration');
+            
+            decorations.forEach((decoration, index) => {
+                const speed = 0.1 + (index * 0.05);
+                decoration.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+
+        // --- Wishlist helpers ---------------------------
+        const wishlistApiConfig = {
+            loggedIn: {{ 'true' if session.get('user_id') else 'false' }},
+            syncUrl: {{ url_for('wishlist_api_sync') | tojson }},
+            clearUrl: {{ url_for('wishlist_api_clear') | tojson }},
+            itemUrlTemplate: {{ url_for('wishlist_api_item', plant_id='__PID__') | tojson }},
+        };
+
+        function normalizeWishlistIds(rawItems) {
+            if (!Array.isArray(rawItems)) {
+                return [];
+            }
+            const seen = new Set();
+            const normalized = [];
+            rawItems.forEach((item) => {
+                let rawId = "";
+                if (typeof item === "string" || typeof item === "number") {
+                    rawId = String(item);
+                } else if (item && typeof item === "object") {
+                    rawId = String(item.id || item.plant_id || item.plantId || "");
+                }
+                const id = rawId.trim();
+                if (id && !seen.has(id)) {
+                    seen.add(id);
+                    normalized.push(id);
+                }
+            });
+            return normalized;
+        }
+
+        function getWishlistIds() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem("wishlist") || "[]");
+                return normalizeWishlistIds(parsed);
+            } catch (err) {
+                return [];
+            }
+        }
+
+        function setWishlistIds(items) {
+            const normalized = normalizeWishlistIds(items);
+            localStorage.setItem("wishlist", JSON.stringify(normalized));
+            return normalized;
+        }
+
+        function updateWishlistCount() {
+            const wl = getWishlistIds();
+            const counter = document.getElementById("wishlistCount");
+            if (counter) {
+                counter.textContent = wl.length;
+            }
+            return wl;
+        }
+
+        function wishlistItemUrl(plantId) {
+            return wishlistApiConfig.itemUrlTemplate.replace("__PID__", encodeURIComponent(String(plantId || "").trim()));
+        }
+
+        async function syncWishlistWithServer() {
+            if (!wishlistApiConfig.loggedIn) {
+                return updateWishlistCount();
+            }
+
+            const localItems = getWishlistIds();
+            try {
+                const response = await fetch(wishlistApiConfig.syncUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ items: localItems }),
+                });
+                if (!response.ok) {
+                    throw new Error("wishlist sync failed");
+                }
+                const data = await response.json();
+                setWishlistIds(data.items || []);
+            } catch (err) {
+                // Keep local wishlist as fallback when API is unavailable.
+            }
+            return updateWishlistCount();
+        }
+
+        async function addToWishlist(plantId, options = {}) {
+            const id = String(plantId || "").trim();
+            if (!id) {
+                return { added: false, items: updateWishlistCount() };
+            }
+
+            if (!wishlistApiConfig.loggedIn) {
+                const local = getWishlistIds();
+                if (local.includes(id)) {
+                    if (!options.silent && typeof showNotification === "function") {
+                        showNotification("Already in wishlist!", "info");
+                    }
+                    return { added: false, items: local };
+                }
+                local.push(id);
+                const items = setWishlistIds(local);
+                updateWishlistCount();
+                if (!options.silent && typeof showNotification === "function") {
+                    showNotification("Added to wishlist!", "success");
+                }
+                return { added: true, items };
+            }
+
+            try {
+                const response = await fetch(wishlistItemUrl(id), { method: "POST" });
+                if (!response.ok) {
+                    throw new Error("wishlist add failed");
+                }
+                const data = await response.json();
+                const items = setWishlistIds(data.items || []);
+                updateWishlistCount();
+                if (!options.silent && typeof showNotification === "function") {
+                    showNotification(data.added ? "Added to wishlist!" : "Already in wishlist!", data.added ? "success" : "info");
+                }
+                return { added: Boolean(data.added), items };
+            } catch (err) {
+                const local = getWishlistIds();
+                if (!local.includes(id)) {
+                    local.push(id);
+                    setWishlistIds(local);
+                }
+                updateWishlistCount();
+                if (!options.silent && typeof showNotification === "function") {
+                    showNotification("Added locally. Server sync will retry automatically.", "warning");
+                }
+                return { added: true, items: local };
+            }
+        }
+
+        async function removeWishlistItem(plantId, options = {}) {
+            const id = String(plantId || "").trim();
+            if (!id) {
+                return updateWishlistCount();
+            }
+
+            if (wishlistApiConfig.loggedIn) {
+                try {
+                    const response = await fetch(wishlistItemUrl(id), { method: "DELETE" });
+                    if (!response.ok) {
+                        throw new Error("wishlist remove failed");
+                    }
+                    const data = await response.json();
+                    const items = setWishlistIds(data.items || []);
+                    updateWishlistCount();
+                    if (!options.silent && typeof showNotification === "function") {
+                        showNotification("Removed from wishlist.", "info");
+                    }
+                    return items;
+                } catch (err) {
+                    // Fall back to local removal.
+                }
+            }
+
+            const items = getWishlistIds().filter((itemId) => itemId !== id);
+            setWishlistIds(items);
+            updateWishlistCount();
+            if (!options.silent && typeof showNotification === "function") {
+                showNotification("Removed from wishlist.", "info");
+            }
+            return items;
+        }
+
+        async function clearWishlistItems(options = {}) {
+            if (wishlistApiConfig.loggedIn) {
+                try {
+                    const response = await fetch(wishlistApiConfig.clearUrl, { method: "POST" });
+                    if (!response.ok) {
+                        throw new Error("wishlist clear failed");
+                    }
+                    const data = await response.json();
+                    setWishlistIds(data.items || []);
+                    updateWishlistCount();
+                    if (!options.silent && typeof showNotification === "function") {
+                        showNotification("Wishlist cleared.", "info");
+                    }
+                    return;
+                } catch (err) {
+                    // Fall back to local clear.
+                }
+            }
+
+            setWishlistIds([]);
+            updateWishlistCount();
+            if (!options.silent && typeof showNotification === "function") {
+                showNotification("Wishlist cleared.", "info");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updateWishlistCount();
+            syncWishlistWithServer();
+        });
+        window.addEventListener("storage", function (event) {
+            if (event.key === "wishlist") {
+                updateWishlistCount();
+            }
+        });
+
+    </script>
+</body>
+</html>

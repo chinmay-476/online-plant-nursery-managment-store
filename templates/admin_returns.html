@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-page">
+    <h1 class="page-title">Return Requests</h1>
+
+    <section class="card" style="margin-bottom:12px;">
+        <form method="GET" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <select class="form-control" name="status">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+                {% for key, label in status_labels.items() %}
+                <option value="{{ key }}" {% if status_filter == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-primary" type="submit">Filter</button>
+        </form>
+    </section>
+
+    <section class="card">
+        {% if requests_list %}
+        <div style="display:grid;gap:10px;">
+            {% for req in requests_list %}
+            <article style="border:1px solid var(--border-color);border-radius:10px;padding:10px;background:var(--bg-color);">
+                <h3 style="margin:0 0 6px;">Order #{{ req.order_id }} - {{ req.order.plant_name if req.order else '-' }}</h3>
+                <p style="margin:0;"><strong>User:</strong> {{ req.user.name if req.user else '-' }} ({{ req.user.email if req.user else '-' }})</p>
+                <p style="margin:6px 0;"><strong>Reason:</strong> {{ req.reason }}</p>
+                <p style="margin:6px 0;"><strong>Details:</strong> {{ req.details }}</p>
+                <form method="POST" action="{{ url_for('admin_update_return', return_id=req.id) }}" style="display:grid;gap:8px;">
+                    <input type="hidden" name="status_filter" value="{{ status_filter }}">
+                    <select class="form-control" name="status">
+                        {% for key, label in status_labels.items() %}
+                        <option value="{{ key }}" {% if req.status == key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <input class="form-control" type="text" name="admin_note" placeholder="Internal/admin note" value="{{ req.admin_note or '' }}">
+                    <button class="btn btn-primary" type="submit">Update Return Request</button>
+                </form>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-note">No return requests.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

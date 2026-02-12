@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="delivery-page">
+    <h1 class="page-title">Delivery Information</h1>
+
+    <div class="delivery-grid">
+        <section class="card">
+            <h2>Shipping Address</h2>
+            <form method="POST" id="deliveryForm" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control", placeholder="Full name") }}
+                    {% for error in form.name.errors %}
+                        <small class="error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control", placeholder="name@example.com") }}
+                    {% for error in form.email.errors %}
+                        <small class="error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.phone_number.label(class="form-label") }}
+                    {{ form.phone_number(class="form-control", placeholder="10-digit phone number") }}
+                    {% for error in form.phone_number.errors %}
+                        <small class="error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.address.label(class="form-label") }}
+                    {{ form.address(class="form-control", placeholder="House no., street, area, city") }}
+                    {% for error in form.address.errors %}
+                        <small class="error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        {{ form.pincode.label(class="form-label") }}
+                        {{ form.pincode(class="form-control", placeholder="6-digit pincode") }}
+                        {% for error in form.pincode.errors %}
+                            <small class="error">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.homeoffice.label(class="form-label") }}
+                        {{ form.homeoffice(class="form-control") }}
+                        {% for error in form.homeoffice.errors %}
+                            <small class="error">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {{ form.submit(class="btn btn-primary full-width") }}
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Order Preview</h2>
+            {% if plant %}
+                <div class="preview-item">
+                    <img src="{{ url_for('static', filename='images/' + plant.image) }}" alt="{{ plant.name }}">
+                    <div>
+                        <h3>{{ plant.name }}</h3>
+                        {% if variant and variant.label %}
+                        <p>Variant: {{ variant.label }}</p>
+                        {% endif %}
+                        <p>Quantity: {{ quantity }}</p>
+                        <p class="delivery-hint"><i class="fas fa-truck"></i> {{ plant.delivery_text }}</p>
+                    </div>
+                </div>
+                <div class="price-row">
+                    <span>Subtotal</span>
+                    <span>{{ subtotal|inr }}</span>
+                </div>
+                {% if coupon and coupon.applied and coupon.discount > 0 %}
+                <div class="price-row discount">
+                    <span>Coupon Discount ({{ coupon.code }})</span>
+                    <span>-{{ coupon.discount|inr }}</span>
+                </div>
+                {% endif %}
+                {% if loyalty_discount and loyalty_discount > 0 %}
+                <div class="price-row discount">
+                    <span>Loyalty Discount</span>
+                    <span>-{{ loyalty_discount|inr }}</span>
+                </div>
+                {% endif %}
+                <div class="price-row">
+                    <span>Delivery</span>
+                    <span>
+                        {% if delivery_fee == 0 %}
+                            FREE
+                        {% else %}
+                            {{ delivery_fee|inr }}
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="price-row total">
+                    <span>Total</span>
+                    <span>{{ grand_total|inr }}</span>
+                </div>
+            {% else %}
+                <p>No plant selected.</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+
+<style>
+    .delivery-page {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .delivery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+    }
+
+    .row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .preview-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .preview-item img {
+        width: 84px;
+        height: 84px;
+        border-radius: 10px;
+        object-fit: cover;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 8px 0;
+    }
+
+    .price-row.total {
+        border-top: 1px solid var(--border-color);
+        padding-top: 10px;
+        font-weight: 700;
+    }
+
+    .price-row.discount {
+        color: var(--success-color);
+        font-weight: 600;
+    }
+
+    .delivery-hint {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .error {
+        color: var(--danger-color);
+        display: block;
+        margin-top: 4px;
+    }
+
+    .full-width {
+        width: 100%;
+    }
+
+    @media (max-width: 600px) {
+        .row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
